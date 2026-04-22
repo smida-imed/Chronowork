@@ -115,7 +115,28 @@ select option{background:var(--sur2);}
 .toast.ok{border-color:rgba(74,240,176,.4);}
 .toast.err{border-color:rgba(240,64,80,.5);}
 .toast.warn{border-color:rgba(240,192,64,.5);}
-@media(max-width:600px){.sgrid{grid-template-columns:1fr 1fr;}.wrow{grid-template-columns:55px 1fr 60px;}.wrow .wbar-w{display:none;}}
+.tab.active.dashboard{background:rgba(99,179,237,.15);color:#63b3ed;}
+.tab.active.history{background:rgba(246,173,85,.15);color:#f6ad55;}
+.tab.active.notif{background:rgba(154,230,180,.15);color:#9ae6b4;}
+/* CHARTS */
+.chart-wrap{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:16px;margin-bottom:14px;}
+.chart-wrap h4{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:14px;}
+.bar-chart{display:flex;flex-direction:column;gap:6px;}
+.bar-row{display:grid;grid-template-columns:80px 1fr 60px;gap:8px;align-items:center;font-size:11px;}
+.bar-track{height:20px;background:var(--sur2);border-radius:4px;overflow:hidden;position:relative;}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s;}
+.bar-val{color:var(--tx2);text-align:right;}
+.bar-lbl{color:var(--tx2);font-size:10px;}
+/* MONTH COMPARE */
+.month-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px;}
+.month-card{background:var(--sur2);border:1px solid var(--brd);border-radius:8px;padding:12px;}
+.month-card .mn{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.month-card .mv{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;}
+.month-card .ms{font-size:10px;color:var(--tx3);margin-top:2px;}
+/* NOTIF */
+.notif-item{background:var(--sur2);border:1px solid var(--brd);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:11px;}
+.notif-item .nt{color:var(--tx2);}
+.notif-item .nd{color:var(--tx3);font-size:10px;margin-top:2px;}
 </style>
 </head>
 <body>
@@ -127,14 +148,17 @@ select option{background:var(--sur2);}
 </header>
 
 <div class="tabs">
-  <button class="tab active work"   onclick="go('work')">💼 CDI/CDD</button>
+  <button class="tab active work"   onclick="go('work')">💼 CDI</button>
   <button class="tab interim"       onclick="go('interim')">🔶 Intérim</button>
   <button class="tab leave"         onclick="go('leave')">🌴 Congés</button>
   <button class="tab summary"       onclick="go('summary')">∑ Bilan</button>
-  <button class="tab report"        onclick="go('report')">📄 Récap Chef</button>
+  <button class="tab report"        onclick="go('report')">📄 Chef</button>
+  <button class="tab dashboard"     onclick="go('dashboard')">📊 Graphiques</button>
+  <button class="tab history"       onclick="go('history')">📅 Historique</button>
+  <button class="tab notif"         onclick="go('notif')">🔔 Rappels</button>
 </div>
 
-<!-- ══════════ PANEL CDI ══════════ -->
+<!-- ========== PANEL CDI ========== -->
 <div class="panel active" id="panel-work">
   <div class="card">
     <h3><span class="dot" style="background:var(--grn)"></span>Ajouter une journée CDI/CDD</h3>
@@ -190,7 +214,7 @@ select option{background:var(--sur2);}
   </div>
 </div>
 
-<!-- ══════════ PANEL INTERIM ══════════ -->
+<!-- ========== PANEL INTERIM ========== -->
 <div class="panel" id="panel-interim">
   <div class="card">
     <h3><span class="dot" style="background:var(--acc)"></span>Ajouter une journée Intérim</h3>
@@ -248,7 +272,7 @@ select option{background:var(--sur2);}
   </div>
 </div>
 
-<!-- ══════════ PANEL CONGES ══════════ -->
+<!-- ========== PANEL CONGES ========== -->
 <div class="panel" id="panel-leave">
   <div class="card">
     <h3><span class="dot" style="background:var(--pur)"></span>Poser un congé ou repos compensateur</h3>
@@ -288,7 +312,7 @@ select option{background:var(--sur2);}
   </div>
 </div>
 
-<!-- ══════════ PANEL BILAN ══════════ -->
+<!-- ========== PANEL BILAN ========== -->
 <div class="panel" id="panel-summary">
   <div class="sgrid">
     <div class="scard sc-g"><div class="slabel">Heures CDI/CDD</div><div class="sval" style="color:var(--grn)" id="s-wh">0h00</div><div class="ssub" id="s-ws">—</div></div>
@@ -370,7 +394,7 @@ select option{background:var(--sur2);}
   <div class="brow"><button class="btn bg" onclick="resetAll()">🗑 Tout effacer</button></div>
 </div>
 
-<!-- ══════════ PANEL RECAP CHEF ══════════ -->
+<!-- ========== PANEL RECAP CHEF ========== -->
 <div class="panel" id="panel-report">
   <div class="card">
     <h3><span class="dot" style="background:var(--blu)"></span>Récapitulatif à envoyer au chef</h3>
@@ -394,6 +418,7 @@ select option{background:var(--sur2);}
       <button class="btn bg" onclick="selectAll()" id="r-sel" style="display:none">☰ Sélectionner tout</button>
       <button class="btn bm" onclick="mailReport()" id="r-mail" style="display:none">✉ Ouvrir dans mail</button>
       <button class="btn bg" onclick="dlReport()" id="r-dl" style="display:none">⬇ Télécharger .txt</button>
+      <button class="btn bi" onclick="exportPDF()" id="r-pdf" style="display:none">📄 Exporter PDF</button>
     </div>
   </div>
   <div id="report-out" style="display:none;cursor:text;"></div>
@@ -414,13 +439,93 @@ select option{background:var(--sur2);}
   </div>
 </div>
 
+<!-- ========== PANEL GRAPHIQUES ========== -->
+<div class="panel" id="panel-dashboard">
+  <div class="chart-wrap">
+    <h4>📊 Heures par mois — CDI/CDD</h4>
+    <div class="bar-chart" id="chart-monthly-work"></div>
+  </div>
+  <div class="chart-wrap">
+    <h4>⚡ Heures supplémentaires par mois</h4>
+    <div class="bar-chart" id="chart-monthly-hs"></div>
+  </div>
+  <div class="chart-wrap">
+    <h4>🚗 Frais kilométriques intérim par mois</h4>
+    <div class="bar-chart" id="chart-monthly-km"></div>
+  </div>
+  <div class="chart-wrap">
+    <h4>🌴 Congés posés par type</h4>
+    <div class="bar-chart" id="chart-leave-type"></div>
+  </div>
+</div>
+
+<!-- ========== PANEL HISTORIQUE ========== -->
+<div class="panel" id="panel-history">
+  <div class="card">
+    <h3><span class="dot" style="background:#f6ad55"></span>Historique & comparaison mensuelle</h3>
+    <div class="fields">
+      <label>Année
+        <select id="hist-year" onchange="renderHistory()">
+          <option value="2025">2025</option>
+          <option value="2026" selected>2026</option>
+          <option value="2027">2027</option>
+        </select>
+      </label>
+      <label>Type
+        <select id="hist-type" onchange="renderHistory()">
+          <option value="work">CDI/CDD</option>
+          <option value="interim">Intérim</option>
+          <option value="both">Les deux</option>
+        </select>
+      </label>
+    </div>
+  </div>
+  <div class="month-grid" id="history-months"></div>
+  <div class="chart-wrap">
+    <h4>Comparaison mois par mois</h4>
+    <div class="bar-chart" id="chart-compare"></div>
+  </div>
+</div>
+
+<!-- ========== PANEL NOTIFICATIONS ========== -->
+<div class="panel" id="panel-notif">
+  <div class="card">
+    <h3><span class="dot" style="background:#9ae6b4"></span>Rappels de saisie</h3>
+    <div class="info">
+      Configurez des rappels pour ne pas oublier de saisir vos heures. Les notifications s'affichent même quand l'application est fermée (si installée sur votre téléphone).
+    </div>
+    <div id="notif-permission" style="margin-bottom:14px;">
+      <button class="btn bw" onclick="requestNotifPermission()">🔔 Activer les notifications</button>
+      <span id="notif-status" style="font-size:11px;color:var(--tx3);margin-left:10px;"></span>
+    </div>
+    <div class="fields">
+      <label>Jour de rappel
+        <select id="notif-day">
+          <option value="1">Lundi</option>
+          <option value="2">Mardi</option>
+          <option value="3">Mercredi</option>
+          <option value="4">Jeudi</option>
+          <option value="5" selected>Vendredi</option>
+        </select>
+      </label>
+      <label>Heure<input type="time" id="notif-time" value="18:00"></label>
+      <label>Message<input type="text" id="notif-msg" value="N'oubliez pas de saisir vos heures !"></label>
+    </div>
+    <button class="btn bw" onclick="addNotif()">＋ Ajouter ce rappel</button>
+  </div>
+  <div id="notif-list"></div>
+  <div id="notif-empty" style="text-align:center;padding:30px;color:var(--tx3);font-size:12px;">
+    <div style="font-size:28px;margin-bottom:8px;">🔔</div>Aucun rappel configuré
+  </div>
+</div>
+
 </div><!-- /app -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════
+// ============================================
 //  CONSTANTES
-// ════════════════════════════════════════════
+// ============================================
 const W35 = 35*60;   // 2100 min — seuil hebdo HS
 const W43 = 43*60;   // 2580 min — seuil tranche 2
 const DAY9 = 9*60;   // 540 min — journée type
@@ -435,16 +540,16 @@ const KM_BAREME = {3:0.529, 4:0.606, 5:0.636, 6:0.665, 7:0.697};
 
 const LEAVE_LBL = {ferie:'Jour férié',cp:'Congé payé',repos:'Repos compensateur',maladie:'Arrêt maladie',autre:'Autre absence'};
 
-// ════════════════════════════════════════════
+// ============================================
 //  STATE
-// ════════════════════════════════════════════
+// ============================================
 let entries = JSON.parse(localStorage.getItem('cw4_e')||'[]');
 let nid     = parseInt(localStorage.getItem('cw4_n')||'1');
 function save(){ localStorage.setItem('cw4_e',JSON.stringify(entries)); localStorage.setItem('cw4_n',String(nid)); }
 
-// ════════════════════════════════════════════
+// ============================================
 //  UTILS
-// ════════════════════════════════════════════
+// ============================================
 const tMin = t => { const[h,m]=t.split(':').map(Number); return h*60+m; };
 const hhmm = m => { const n=m<0; m=Math.abs(m); return (n?'−':'')+Math.floor(m/60)+'h'+String(m%60).padStart(2,'0'); };
 const dStr = d => { const[y,mo,da]=d.split('-'); return JF[new Date(d).getDay()]+' '+da+'/'+mo+'/'+y; };
@@ -474,9 +579,9 @@ function isFerie(ds){ return feries(parseInt(ds.substring(0,4))).has(ds); }
 
 function calcKm(km,cv){ return Math.round(km*2*(KM_BAREME[cv]||KM_BAREME[5])*100)/100; }
 
-// ════════════════════════════════════════════
+// ============================================
 //  INIT
-// ════════════════════════════════════════════
+// ============================================
 document.addEventListener('DOMContentLoaded',()=>{
   const t=new Date();
   ['w-date','i-date','l-from','l-to'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=fmtD(t); });
@@ -489,26 +594,41 @@ document.addEventListener('DOMContentLoaded',()=>{
     toggleHSDetail();
   });
 
+  // Année courante dans l'historique
+  const curYear=new Date().getFullYear().toString();
+  const histSel=document.getElementById('hist-year');
+  if(histSel){
+    Array.from(histSel.options).forEach(o=>{ if(o.value===curYear) o.selected=true; });
+  }
+
   renderAll();
   refreshLeave();
+  scheduleNotifs();
   setupPWA();
 });
 
-// ════════════════════════════════════════════
+// ============================================
 //  NAVIGATION
-// ════════════════════════════════════════════
+// ============================================
 function go(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelector('.tab.'+name).classList.add('active');
   document.getElementById('panel-'+name).classList.add('active');
   if(name==='summary') updateSummary();
-  if(name==='report'){ document.getElementById('report-out').style.display='none'; ['r-sel','r-mail','r-dl','r-hint'].forEach(x=>document.getElementById(x).style.display='none'); }
+  if(name==='dashboard') renderDashboard();
+  if(name==='history') renderHistory();
+  if(name==='notif') renderNotifList();
+  if(name==='report'){
+    document.getElementById('report-out').style.display='none';
+    ['r-sel','r-mail','r-dl','r-hint','r-pdf'].forEach(x=>{ const el=document.getElementById(x); if(el) el.style.display='none'; });
+    document.getElementById('hs-accordion').style.display='none';
+  }
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  CUSTOM CENTRE
-// ════════════════════════════════════════════
+// ============================================
 function toggleCustom(p){
   const v=document.getElementById(p+'-site').value;
   const lbl=document.getElementById(p+'-autre-lbl');
@@ -521,9 +641,9 @@ function getSite(p){
   return v;
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  PREVIEWS
-// ════════════════════════════════════════════
+// ============================================
 function previewTravel(){
   const date=document.getElementById('w-date').value;
   const min=parseInt(document.getElementById('w-travel').value)||0;
@@ -564,9 +684,9 @@ function previewKm(){
   el.textContent='🚗 '+km+' km aller × 2 = '+(km*2)+' km A/R → '+f.toFixed(2)+' € (barème '+KM_BAREME[cv]+'€/km, '+cv+'CV)';
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  ADD WORK
-// ════════════════════════════════════════════
+// ============================================
 function addWork(){
   const date=document.getElementById('w-date').value;
   const start=document.getElementById('w-start').value;
@@ -628,9 +748,9 @@ function addWork(){
   document.getElementById('w-preview').textContent='';
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  ADD INTERIM
-// ════════════════════════════════════════════
+// ============================================
 function addInterim(){
   const date=document.getElementById('i-date').value;
   const start=document.getElementById('i-start').value;
@@ -663,9 +783,9 @@ function addInterim(){
   document.getElementById('i-km-prev').textContent='';
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  ADD LEAVE
-// ════════════════════════════════════════════
+// ============================================
 function addLeave(){
   const from=document.getElementById('l-from').value;
   const to=document.getElementById('l-to').value||from;
@@ -686,9 +806,9 @@ function addLeave(){
   document.getElementById('l-note').value='';
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  DELETE
-// ════════════════════════════════════════════
+// ============================================
 function del(id){
   entries=entries.filter(e=>e.id!==id);
   save(); renderAll(); refreshLeave();
@@ -696,9 +816,9 @@ function del(id){
   toast('Entrée supprimée.');
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  RENDER
-// ════════════════════════════════════════════
+// ============================================
 function renderAll(){ renderWork(); renderInterim(); renderLeave(); }
 
 function renderWork(){
@@ -765,9 +885,9 @@ function renderLeave(){
   </tr>`).join('');
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  REFRESH LEAVE COUNTERS (toujours à jour)
-// ════════════════════════════════════════════
+// ============================================
 function refreshLeave(){
   const lList=entries.filter(e=>e.type==='leave');
   const cpN=lList.filter(e=>e.leaveType==='cp').length;
@@ -783,12 +903,12 @@ function refreshLeave(){
   if(hsEl) hsEl.textContent=hhmm(hsN);
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  CALCUL HS PAR SEMAINE
 //  Base 35h/semaine. Trajet inclus dans netMin.
 //  Tranche 1 : 36h-43h → +25%
 //  Tranche 2 : ≥44h    → +50%
-// ════════════════════════════════════════════
+// ============================================
 function calcOT(list){
   const wks={};
   list.forEach(e=>{ const w=isoWeek(e.date); if(!wks[w])wks[w]=[]; wks[w].push(e); });
@@ -805,9 +925,9 @@ function calcOT(list){
   return{norm,s1,s2,wages,det};
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  SUMMARY
-// ════════════════════════════════════════════
+// ============================================
 function updateSummary(){
   const wC=calcOT(entries.filter(e=>e.type==='work'));
   const iC=calcOT(entries.filter(e=>e.type==='interim'));
@@ -886,9 +1006,9 @@ function renderWeeksDetail(det){
   }).join('');
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  RAPPORT CHEF
-// ════════════════════════════════════════════
+// ============================================
 function genReport(){
   const name=document.getElementById('r-name').value||'Employé';
   const perLbl=document.getElementById('r-period-lbl').value;
@@ -919,8 +1039,8 @@ function genReport(){
   const wkMap={};
   wList.forEach(e=>{ const w=isoWeek(e.date); if(!wkMap[w])wkMap[w]=[]; wkMap[w].push(e); });
 
-  const SEP='─'.repeat(62);
-  const DBL='═'.repeat(62);
+  const SEP='-'.repeat(62);
+  const DBL='='.repeat(62);
   const L=[];
 
   L.push(DBL);
@@ -1011,6 +1131,7 @@ function genReport(){
   out.style.display='block';
   ['r-sel','r-mail','r-dl','r-hint'].forEach(x=>document.getElementById(x).style.display='inline-flex');
   document.getElementById('r-hint').style.display='block';
+  document.getElementById('r-pdf').style.display='inline-flex';
 
   // Construire le détail HS interactif
   buildHSDetail(wkMap);
@@ -1195,9 +1316,9 @@ function dlReport(){
   toast('✓ Fichier .txt téléchargé');
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  SAUVEGARDE JSON
-// ════════════════════════════════════════════
+// ============================================
 function exportJSON(){
   const data={entries,nid,exportDate:new Date().toISOString(),app:'ChronoWork'};
   const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -1225,9 +1346,9 @@ function importJSON(evt){
   evt.target.value='';
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  PWA — INSTALLATION MOBILE
-// ════════════════════════════════════════════
+// ============================================
 let deferredPrompt=null;
 
 // Génération dynamique du manifest PWA
@@ -1278,9 +1399,9 @@ function installPWA(){
   });
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  EXPORT ICS
-// ════════════════════════════════════════════
+// ============================================
 function exportICS(filter){
   let list=entries;
   if(filter==='work')  list=entries.filter(e=>e.type==='work');
@@ -1311,13 +1432,291 @@ function exportICS(filter){
   toast('✓ Export .ics ('+list.length+' entrée(s))');
 }
 
-// ════════════════════════════════════════════
+// ============================================
 //  RESET & TOAST
-// ════════════════════════════════════════════
+// ============================================
 function resetAll(){
   if(!confirm('Effacer TOUTES les données ? Irréversible.')) return;
   entries=[]; nid=1; save(); renderAll(); refreshLeave(); updateSummary();
   toast('Données effacées.');
+}
+
+// ============================================
+//  PDF EXPORT
+// ============================================
+function exportPDF(){
+  const txt=document.getElementById('report-out').textContent;
+  if(!txt){ toast('Générez d\'abord le récapitulatif.','err'); return; }
+  const name=(document.getElementById('r-name').value||'recap').replace(/\s+/g,'-');
+
+  // Crée une fenêtre d'impression stylée
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head>
+  <meta charset="UTF-8">
+  <title>ChronoWork — Récapitulatif</title>
+  <style>
+    body{font-family:'Courier New',monospace;font-size:11px;line-height:1.8;color:#000;background:#fff;padding:20mm;margin:0;}
+    pre{white-space:pre-wrap;word-break:break-word;}
+    h1{font-size:14px;font-family:Arial,sans-serif;margin-bottom:8px;border-bottom:2px solid #000;padding-bottom:6px;}
+    .footer{margin-top:20px;font-size:9px;color:#888;border-top:1px solid #ccc;padding-top:8px;}
+    @media print{@page{margin:15mm;size:A4;}}
+  </style>
+  </head><body>
+  <h1>ChronoWork — Récapitulatif des Heures</h1>
+  <pre>${txt}</pre>
+  <div class="footer">Généré par ChronoWork le ${new Date().toLocaleDateString('fr-FR')}</div>
+  <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script>
+  </body></html>`);
+  win.document.close();
+  toast('✓ Fenêtre d\'impression ouverte');
+}
+
+// ============================================
+//  DASHBOARD — GRAPHIQUES
+// ============================================
+function renderDashboard(){
+  drawMonthlyWork();
+  drawMonthlyHS();
+  drawMonthlyKm();
+  drawLeaveTypes();
+}
+
+function getMonthlyData(type, field){
+  const data={};
+  entries.filter(e=>e.type===type).forEach(e=>{
+    const key=e.date.substring(0,7); // YYYY-MM
+    if(!data[key]) data[key]=0;
+    data[key]+=(field==='netMin'?e.netMin:field==='fraisKm'?(e.fraisKm||0):e.netMin);
+  });
+  return data;
+}
+
+function drawBar(containerId, data, colorVar, unit='h', divisor=60){
+  const c=document.getElementById(containerId);
+  const entries2=Object.entries(data).sort();
+  if(!entries2.length){ c.innerHTML='<p style="color:var(--tx3);font-size:11px;">Aucune donnée.</p>'; return; }
+  const max=Math.max(...entries2.map(([,v])=>v),1);
+  c.innerHTML=entries2.map(([k,v])=>{
+    const pct=Math.round((v/max)*100);
+    const display=unit==='h'?hhmm(v):v.toFixed(2)+' €';
+    const [yr,mo]=k.split('-');
+    const mnames=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    const lbl=mnames[parseInt(mo)-1]+' '+yr.slice(2);
+    return`<div class="bar-row">
+      <span class="bar-lbl">${lbl}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colorVar}"></div></div>
+      <span class="bar-val">${display}</span>
+    </div>`;
+  }).join('');
+}
+
+function drawMonthlyWork(){
+  const data=getMonthlyData('work','netMin');
+  drawBar('chart-monthly-work', data, 'var(--grn)');
+}
+
+function drawMonthlyHS(){
+  const data={};
+  const wkMap={};
+  entries.filter(e=>e.type==='work').forEach(e=>{
+    const wk=isoWeek(e.date);
+    if(!wkMap[wk])wkMap[wk]={entries:[],month:e.date.substring(0,7)};
+    wkMap[wk].entries.push(e);
+  });
+  Object.values(wkMap).forEach(w=>{
+    const tot=w.entries.reduce((a,e)=>a+e.netMin,0);
+    const hs=Math.max(0,tot-W35);
+    if(hs>0){ data[w.month]=(data[w.month]||0)+hs; }
+  });
+  drawBar('chart-monthly-hs', data, 'var(--red)');
+}
+
+function drawMonthlyKm(){
+  const data={};
+  entries.filter(e=>e.type==='interim'&&e.fraisKm>0).forEach(e=>{
+    const k=e.date.substring(0,7);
+    data[k]=(data[k]||0)+(e.fraisKm||0);
+  });
+  const c=document.getElementById('chart-monthly-km');
+  const entries2=Object.entries(data).sort();
+  if(!entries2.length){ c.innerHTML='<p style="color:var(--tx3);font-size:11px;">Aucune donnée.</p>'; return; }
+  const max=Math.max(...entries2.map(([,v])=>v),1);
+  const mnames=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  c.innerHTML=entries2.map(([k,v])=>{
+    const pct=Math.round((v/max)*100);
+    const [yr,mo]=k.split('-');
+    const lbl=mnames[parseInt(mo)-1]+' '+yr.slice(2);
+    return`<div class="bar-row">
+      <span class="bar-lbl">${lbl}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--acc)"></div></div>
+      <span class="bar-val">${v.toFixed(2)} €</span>
+    </div>`;
+  }).join('');
+}
+
+function drawLeaveTypes(){
+  const types={ferie:0,cp:0,repos:0,maladie:0,autre:0};
+  entries.filter(e=>e.type==='leave').forEach(e=>{ if(types[e.leaveType]!==undefined) types[e.leaveType]++; });
+  const labels={ferie:'🎉 Fériés',cp:'✈️ CP',repos:'💤 Repos',maladie:'🏥 Maladie',autre:'📋 Autre'};
+  const colors={ferie:'var(--blu)',cp:'var(--pur)',repos:'var(--grn)',maladie:'var(--red)',autre:'var(--tx2)'};
+  const c=document.getElementById('chart-leave-type');
+  const max=Math.max(...Object.values(types),1);
+  c.innerHTML=Object.entries(types).filter(([,v])=>v>0).map(([k,v])=>{
+    const pct=Math.round((v/max)*100);
+    return`<div class="bar-row">
+      <span class="bar-lbl">${labels[k]}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[k]}"></div></div>
+      <span class="bar-val">${v} j</span>
+    </div>`;
+  }).join('')||'<p style="color:var(--tx3);font-size:11px;">Aucune donnée.</p>';
+}
+
+// ============================================
+//  HISTORIQUE MENSUEL
+// ============================================
+function renderHistory(){
+  const yr=document.getElementById('hist-year').value;
+  const type=document.getElementById('hist-type').value;
+  const mnames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const colors={work:'var(--grn)',interim:'var(--acc)',both:'var(--blu)'};
+
+  // Calcul par mois
+  const months=Array.from({length:12},(_,i)=>{
+    const mo=String(i+1).padStart(2,'0');
+    const key=`${yr}-${mo}`;
+    let workMin=0,iMin=0,hsMin=0;
+
+    // Heures travaillées
+    entries.filter(e=>e.date.startsWith(key)&&(type==='both'||e.type===type)).forEach(e=>{
+      if(e.type==='work') workMin+=e.netMin;
+      if(e.type==='interim') iMin+=e.netMin;
+    });
+
+    // HS par semaine dans ce mois
+    const wkMap={};
+    entries.filter(e=>e.type==='work'&&e.date.startsWith(key)).forEach(e=>{
+      const wk=isoWeek(e.date);
+      if(!wkMap[wk])wkMap[wk]=0;
+      wkMap[wk]+=e.netMin;
+    });
+    Object.values(wkMap).forEach(tot=>{ hsMin+=Math.max(0,tot-W35); });
+
+    const kmTotal=entries.filter(e=>e.type==='interim'&&e.date.startsWith(key)).reduce((a,e)=>a+(e.fraisKm||0),0);
+    const cpCount=entries.filter(e=>e.type==='leave'&&e.leaveType==='cp'&&e.date.startsWith(key)).length;
+
+    return{mo:i,key,workMin,iMin,hsMin,kmTotal,cpCount,total:workMin+iMin};
+  });
+
+  // Cards mois
+  const grid=document.getElementById('history-months');
+  grid.innerHTML=months.map(m=>{
+    const hasData=m.total>0||m.cpCount>0;
+    const col=m.hsMin>0?'var(--red)':m.total>0?'var(--grn)':'var(--tx3)';
+    return`<div class="month-card" style="${hasData?'border-color:'+col+';':''};opacity:${hasData?1:.4}">
+      <div class="mn">${mnames[m.mo]}</div>
+      <div class="mv" style="color:${col}">${m.total>0?hhmm(m.total):'—'}</div>
+      <div class="ms">${m.hsMin>0?'HS: '+hhmm(m.hsMin):''}${m.cpCount>0?'  CP: '+m.cpCount+' j':''}</div>
+    </div>`;
+  }).join('');
+
+  // Graphique comparatif
+  const compare=document.getElementById('chart-compare');
+  const hasAny=months.some(m=>m.total>0);
+  if(!hasAny){ compare.innerHTML='<p style="color:var(--tx3);font-size:11px;">Aucune donnée pour '+yr+'.</p>'; return; }
+  const maxMin=Math.max(...months.map(m=>m.total),1);
+  const mshort=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  compare.innerHTML=months.map(m=>{
+    const pct=Math.round((m.total/maxMin)*100);
+    const hsPct=m.total>0?Math.round((m.hsMin/m.total)*100):0;
+    return`<div class="bar-row">
+      <span class="bar-lbl">${mshort[m.mo]}</span>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:${m.hsMin>0?'var(--red)':'var(--grn)'}"></div>
+      </div>
+      <span class="bar-val">${m.total>0?hhmm(m.total):'—'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ============================================
+//  NOTIFICATIONS / RAPPELS
+// ============================================
+let notifs=JSON.parse(localStorage.getItem('cw4_notifs')||'[]');
+function saveNotifs(){ localStorage.setItem('cw4_notifs',JSON.stringify(notifs)); }
+
+function requestNotifPermission(){
+  if(!('Notification' in window)){ toast('Notifications non supportées sur ce navigateur.','warn'); return; }
+  Notification.requestPermission().then(p=>{
+    const s=document.getElementById('notif-status');
+    if(p==='granted'){ s.textContent='✓ Notifications activées'; s.style.color='var(--grn)'; toast('✓ Notifications activées !'); }
+    else { s.textContent='✗ Permission refusée'; s.style.color='var(--red)'; toast('Permission refusée.','err'); }
+  });
+}
+
+function scheduleNotifs(){
+  if(!('Notification' in window)) return;
+  clearInterval(window._notifInterval);
+  window._notifInterval=setInterval(()=>{
+    if(Notification.permission!=='granted') return;
+    const now=new Date();
+    const dow=now.getDay()||7;
+    const timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    notifs.filter(n=>n.active&&n.day===dow&&n.time===timeStr).forEach(n=>{
+      try{ new Notification('⏱ ChronoWork',{body:n.msg}); }
+      catch(e){}
+    });
+  },60000);
+}
+
+function addNotif(){
+  const day=parseInt(document.getElementById('notif-day').value);
+  const time=document.getElementById('notif-time').value;
+  const msg=document.getElementById('notif-msg').value||'N\'oubliez pas de saisir vos heures !';
+  const days=['','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+  notifs.push({id:Date.now(),day,time,msg,active:true});
+  saveNotifs();
+  renderNotifList();
+  scheduleNotifs();
+  toast('✓ Rappel ajouté — '+days[day]+' à '+time);
+}
+
+function delNotif(id){
+  notifs=notifs.filter(n=>n.id!==id);
+  saveNotifs(); renderNotifList();
+  toast('Rappel supprimé.');
+}
+
+function toggleNotif(id){
+  const n=notifs.find(n=>n.id===id);
+  if(n){ n.active=!n.active; saveNotifs(); renderNotifList(); scheduleNotifs(); }
+}
+
+const dayNames=['','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+
+function renderNotifList(){
+  const c=document.getElementById('notif-list');
+  const em=document.getElementById('notif-empty');
+  if(!notifs.length){ c.innerHTML=''; em.style.display='block'; return; }
+  em.style.display='none';
+  c.innerHTML=notifs.map(n=>`
+    <div class="notif-item">
+      <div>
+        <div class="nt">${dayNames[n.day]} à ${n.time}</div>
+        <div class="nd">${n.msg}</div>
+      </div>
+      <div class="brow">
+        <button class="btn ${n.active?'bw':'bg'}" onclick="toggleNotif(${n.id})" style="font-size:10px;padding:4px 10px;">${n.active?'✓ Actif':'Inactif'}</button>
+        <button class="btn bd" onclick="delNotif(${n.id})">✕</button>
+      </div>
+    </div>`).join('');
+
+  // Afficher statut permission
+  const s=document.getElementById('notif-status');
+  if('Notification' in window){
+    if(Notification.permission==='granted'){ s.textContent='✓ Activées'; s.style.color='var(--grn)'; }
+    else if(Notification.permission==='denied'){ s.textContent='✗ Bloquées'; s.style.color='var(--red)'; }
+    else { s.textContent='En attente'; s.style.color='var(--tx3)'; }
+  }
 }
 
 function toast(msg, type='ok'){
