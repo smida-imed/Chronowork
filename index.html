@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ChronoWork">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0c10">
+<link rel="manifest" id="pwa-manifest">
+<title>ChronoWork</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c10;--sur:#12151c;--sur2:#1a1e28;--brd:#252a38;
+  --acc:#f0c040;--red:#f04080;--grn:#4af0b0;--pur:#a78bfa;--blu:#4285f4;
+  --tx:#e8eaf0;--tx2:#8892a4;--tx3:#555e70;--r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--tx);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(240,192,64,.03)1px,transparent 1px),linear-gradient(90deg,rgba(240,192,64,.03)1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:28px 16px 80px;}
+/* HEADER */
+header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:12px;flex-wrap:wrap;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;letter-spacing:-.5px;}
+.logo span{color:var(--acc);}
+.logo small{font-size:10px;font-weight:400;font-family:'DM Mono',monospace;color:var(--tx3);letter-spacing:2px;display:block;margin-top:3px;text-transform:uppercase;}
+.wkbadge{background:var(--sur);border:1px solid var(--brd);border-radius:8px;padding:8px 14px;font-size:11px;color:var(--tx2);text-align:right;}
+.wkbadge strong{display:block;font-family:'Syne',sans-serif;font-size:15px;color:var(--tx);font-weight:700;}
+/* TABS */
+.tabs{display:flex;gap:3px;background:var(--sur);border:1px solid var(--brd);border-radius:10px;padding:3px;margin-bottom:20px;flex-wrap:wrap;}
+.tab{flex:1;min-width:100px;padding:8px 10px;border:none;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s;background:transparent;color:var(--tx3);}
+.tab.active.work{background:rgba(74,240,176,.15);color:var(--grn);}
+.tab.active.interim{background:rgba(240,192,64,.15);color:var(--acc);}
+.tab.active.leave{background:rgba(167,139,250,.15);color:var(--pur);}
+.tab.active.summary{background:rgba(240,64,128,.12);color:var(--red);}
+.tab.active.report{background:rgba(66,133,244,.15);color:var(--blu);}
+.panel{display:none;}.panel.active{display:block;}
+/* CARDS & FORMS */
+.card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:20px;margin-bottom:16px;}
+.card h3{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--tx2);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px;}
+label{display:flex;flex-direction:column;gap:4px;font-size:10px;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;}
+input,select{background:var(--sur2);border:1px solid var(--brd);border-radius:7px;padding:8px 10px;color:var(--tx);font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;width:100%;}
+input:focus,select:focus{border-color:var(--acc);}
+select option{background:var(--sur2);}
+.info{background:var(--sur2);border:1px solid var(--brd);border-radius:7px;padding:10px 13px;margin-bottom:12px;font-size:11px;color:var(--tx3);line-height:1.7;}
+.info strong{color:var(--acc);}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:all .2s;}
+.bw{background:rgba(74,240,176,.15);color:var(--grn);border-color:rgba(74,240,176,.3);}
+.bw:hover{background:rgba(74,240,176,.25);}
+.bi{background:rgba(240,192,64,.15);color:var(--acc);border-color:rgba(240,192,64,.3);}
+.bi:hover{background:rgba(240,192,64,.25);}
+.bl{background:rgba(167,139,250,.15);color:var(--pur);border-color:rgba(167,139,250,.3);}
+.bl:hover{background:rgba(167,139,250,.25);}
+.bg{background:transparent;color:var(--tx3);border-color:var(--brd);}
+.bg:hover{color:var(--tx);border-color:var(--tx3);}
+.bm{background:rgba(66,133,244,.15);color:var(--blu);border-color:rgba(66,133,244,.3);}
+.bm:hover{background:rgba(66,133,244,.25);}
+.br{background:rgba(240,192,64,.15);color:var(--acc);border-color:rgba(240,192,64,.3);}
+.bd{background:rgba(240,64,80,.1);color:#f04050;border-color:rgba(240,64,80,.2);font-size:10px;padding:3px 8px;}
+.bd:hover{background:rgba(240,64,80,.2);}
+.brow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+/* TABLES */
+.tbl{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);overflow:auto;margin-bottom:16px;}
+.tbl table{width:100%;border-collapse:collapse;font-size:11px;min-width:600px;}
+.tbl thead th{padding:10px 12px;text-align:left;font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);border-bottom:1px solid var(--brd);background:var(--sur2);}
+.tbl tbody tr{border-bottom:1px solid var(--brd);}.tbl tbody tr:last-child{border-bottom:none;}
+.tbl tbody tr:hover{background:rgba(255,255,255,.02);}
+.tbl td{padding:9px 12px;vertical-align:middle;}
+.badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:500;}
+.b-grn{background:rgba(74,240,176,.12);color:var(--grn);}
+.b-acc{background:rgba(240,192,64,.12);color:var(--acc);}
+.b-red{background:rgba(240,64,128,.15);color:var(--red);}
+.b-pur{background:rgba(167,139,250,.15);color:var(--pur);}
+.b-blu{background:rgba(66,133,244,.12);color:var(--blu);}
+/* STATS */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px;}
+.scard{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;}
+.scard::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.sc-g::after{background:var(--grn);}.sc-y::after{background:var(--acc);}.sc-r::after{background:var(--red);}.sc-p::after{background:var(--pur);}.sc-t::after{background:linear-gradient(90deg,var(--grn),var(--acc));}
+.slabel{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);margin-bottom:6px;}
+.sval{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1;}
+.ssub{font-size:10px;color:var(--tx3);margin-top:4px;}
+/* BREAKDOWN */
+.bkd{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:16px;margin-bottom:14px;}
+.bkd h4{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:12px;}
+.brow2{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--brd);font-size:11px;}
+.brow2:last-child{border-bottom:none;}
+.brow2 .d{color:var(--tx2);}.brow2 .v{font-weight:500;}
+/* WEEK BARS */
+.wsect{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:16px;margin-bottom:14px;}
+.wsect h4{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:12px;}
+.wrow{background:var(--sur2);border-radius:7px;padding:10px 12px;margin-bottom:6px;display:grid;grid-template-columns:65px 1fr 70px 110px;gap:10px;align-items:center;font-size:11px;}
+.wlabel{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;}
+.wbar-w{height:5px;background:var(--brd);border-radius:3px;overflow:hidden;}
+.wbar{height:100%;border-radius:3px;}
+/* PREVIEW */
+.preview{font-size:11px;color:var(--acc);margin-bottom:12px;min-height:16px;padding:2px 0;}
+/* REPORT */
+#report-out{background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r);padding:20px;margin-top:14px;white-space:pre-wrap;font-size:11px;line-height:1.8;color:var(--tx);max-height:500px;overflow-y:auto;cursor:text;}
+/* SOLDE CP */
+.solde-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+.solde-box{background:var(--sur2);border:1px solid rgba(167,139,250,.3);border-radius:8px;padding:10px 14px;}
+.solde-box .sl{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.solde-box .sv{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--pur);}
+.solde-box.hs-box{border-color:rgba(240,64,128,.2);}
+.solde-box.hs-box .sv{color:var(--red);}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--sur2);border:1px solid var(--brd);border-radius:9px;padding:11px 16px;font-size:11px;color:var(--tx);z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:300px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-color:rgba(74,240,176,.4);}
+.toast.err{border-color:rgba(240,64,80,.5);}
+.toast.warn{border-color:rgba(240,192,64,.5);}
+@media(max-width:600px){.sgrid{grid-template-columns:1fr 1fr;}.wrow{grid-template-columns:55px 1fr 60px;}.wrow .wbar-w{display:none;}}
+.tab.active.dashboard{background:rgba(99,179,237,.15);color:#63b3ed;}
+.tab.active.history{background:rgba(246,173,85,.15);color:#f6ad55;}
+.tab.active.notif{background:rgba(154,230,180,.15);color:#9ae6b4;}
+.chart-wrap{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:16px;margin-bottom:14px;}
+.chart-wrap h4{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:14px;}
+.bar-chart{display:flex;flex-direction:column;gap:6px;}
+.bar-row{display:grid;grid-template-columns:70px 1fr 70px;gap:8px;align-items:center;font-size:11px;}
+.bar-track{height:18px;background:var(--sur2);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;transition:width .4s;}
+.bar-lbl{color:var(--tx2);font-size:10px;}
+.month-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px;}
+.month-card{background:var(--sur2);border:1px solid var(--brd);border-radius:8px;padding:12px;}
+.month-card .mn{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.month-card .mv{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;}
+.month-card .ms{font-size:10px;color:var(--tx3);margin-top:2px;}
+.notif-item{background:var(--sur2);border:1px solid var(--brd);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:11px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="logo">Chrono<span>Work</span><small>CDI · Intérim · Congés · HS</small></div>
+  <div class="wkbadge"><strong id="wk-label">—</strong>Semaine en cours</div>
+</header>
+
+<div class="tabs">
+  <button class="tab active work"   onclick="go('work')">💼 CDI/CDD</button>
+  <button class="tab interim"       onclick="go('interim')">🔶 Intérim</button>
+  <button class="tab leave"         onclick="go('leave')">🌴 Congés</button>
+  <button class="tab summary"       onclick="go('summary')">∑ Bilan</button>
+  <button class="tab report"        onclick="go('report')">📄 Chef</button>
+  <button class="tab dashboard"     onclick="go('dashboard')">📊 Graphiques</button>
+  <button class="tab history"       onclick="go('history')">📅 Historique</button>
+  <button class="tab notif"         onclick="go('notif')">🔔 Rappels</button>
+</div>
+
+<!-- ══════════ PANEL CDI ══════════ -->
+<div class="panel active" id="panel-work">
+  <div class="card">
+    <h3><span class="dot" style="background:var(--grn)"></span>Ajouter une journée CDI/CDD</h3>
+    <div class="info">
+      <strong>Trajet = temps de travail.</strong> Saisissez la durée aller (en minutes) une seule fois.
+      Le lundi → trajet <strong>aller</strong> ajouté. Le jeudi → trajet <strong>retour</strong> ajouté.
+      Les deux comptent dans les heures de la semaine pour le calcul des HS (seuil 35h).
+    </div>
+    <div class="fields">
+      <label>Jour<input type="date" id="w-date"></label>
+      <label>Heure arrivée<input type="time" id="w-start"></label>
+      <label>Heure départ<input type="time" id="w-end"></label>
+      <label>Pause (min)<input type="number" id="w-break" value="60" min="0" max="180"></label>
+    </div>
+    <div class="fields">
+      <label>Durée trajet aller (min)<input type="number" id="w-travel" min="0" placeholder="ex: 120" oninput="previewTravel()"></label>
+      <label>Type de trajet
+        <select id="w-travel-type" onchange="previewTravel()">
+          <option value="auto">🔄 Auto (lundi=aller, jeudi=retour)</option>
+          <option value="aller">🚗 Aller (forcer)</option>
+          <option value="retour">🏠 Retour (forcer)</option>
+          <option value="none">✖ Aucun trajet</option>
+        </select>
+      </label>
+      <label>Centre
+        <select id="w-site" onchange="toggleCustom('w')">
+          <option value="">— Sélectionner —</option>
+          <option value="IRM Château Renoux">IRM Château Renoux</option>
+          <option value="IRM Pithiviers">IRM Pithiviers</option>
+          <option value="IRM Lamotte-Beuvron">IRM Lamotte-Beuvron</option>
+          <option value="IRM Sancerre">IRM Sancerre</option>
+          <option value="__autre__">✏ Autre…</option>
+        </select>
+      </label>
+      <label id="w-autre-lbl" style="display:none">Préciser
+        <input type="text" id="w-autre" placeholder="Nom du centre">
+      </label>
+    </div>
+    <div class="preview" id="w-preview"></div>
+    <button class="btn bw" onclick="addWork()">＋ Ajouter la journée</button>
+  </div>
+  <!-- Filtre mois CDI -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:0 2px;margin-bottom:8px;">
+    <span style="font-size:11px;color:var(--tx2);" id="w-filter-label">📅 Mois en cours</span>
+    <button class="btn bg" id="w-toggle-all" onclick="toggleWorkAll()" style="font-size:10px;padding:4px 12px;">Voir tout l'historique</button>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr>
+        <th>Jour</th><th>Arrivée</th><th>Départ</th><th>Pause</th>
+        <th>Travail</th><th>Trajet</th><th>Total semaine</th><th>Centre</th><th></th>
+      </tr></thead>
+      <tbody id="w-tbody"></tbody>
+    </table>
+  </div>
+  <div id="w-empty" class="empty-state" style="text-align:center;padding:40px;color:var(--tx3);font-size:12px;">
+    <div style="font-size:30px;margin-bottom:8px;">🕐</div>Aucune journée CDI/CDD ce mois-ci
+  </div>
+</div>
+
+<!-- ══════════ PANEL INTERIM ══════════ -->
+<div class="panel" id="panel-interim">
+  <div class="card">
+    <h3><span class="dot" style="background:var(--acc)"></span>Ajouter une journée Intérim</h3>
+    <div class="info">
+      <strong>Frais kilométriques</strong> calculés selon le barème fiscal 2024 — aller × 2. HS identiques au CDI (+25% / +50%).
+    </div>
+    <div class="fields">
+      <label>Jour<input type="date" id="i-date"></label>
+      <label>Heure arrivée<input type="time" id="i-start" oninput="previewSal()"></label>
+      <label>Heure départ<input type="time" id="i-end" oninput="previewSal()"></label>
+      <label>Pause (min)<input type="number" id="i-break" value="30" min="0" max="180" oninput="previewSal()"></label>
+      <label>Taux horaire net (€/h)<input type="number" id="i-rate" min="0" step="0.01" placeholder="ex: 35.00" oninput="previewSal()"></label>
+    </div>
+    <div class="fields">
+      <label>Agence<input type="text" id="i-agency" placeholder="Adecco, Manpower…"></label>
+      <label>Centre
+        <select id="i-site" onchange="toggleCustom('i')">
+          <option value="">— Sélectionner —</option>
+          <option value="IRM Château Renoux">IRM Château Renoux</option>
+          <option value="IRM Pithiviers">IRM Pithiviers</option>
+          <option value="IRM Lamotte-Beuvron">IRM Lamotte-Beuvron</option>
+          <option value="IRM Sancerre">IRM Sancerre</option>
+          <option value="__autre__">✏ Autre…</option>
+        </select>
+      </label>
+      <label id="i-autre-lbl" style="display:none">Préciser
+        <input type="text" id="i-autre" placeholder="Nom du centre">
+      </label>
+    </div>
+    <div class="fields">
+      <label>Distance aller (km)<input type="number" id="i-km" min="0" step="0.5" placeholder="ex: 45" oninput="previewKm()"></label>
+      <label>Puissance véhicule (CV)
+        <select id="i-cv" onchange="previewKm()">
+          <option value="3">3 CV et moins</option>
+          <option value="4">4 CV</option>
+          <option value="5" selected>5 CV</option>
+          <option value="6">6 CV</option>
+          <option value="7">7 CV et plus</option>
+        </select>
+      </label>
+    </div>
+    <div class="preview" id="i-km-prev"></div>
+    <div class="preview" id="i-sal-prev" style="color:var(--grn)"></div>
+    <button class="btn bi" onclick="addInterim()">＋ Ajouter la journée</button>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr>
+        <th>Jour</th><th>Arrivée</th><th>Départ</th><th>Heures nettes</th>
+        <th>Taux/h</th><th>Salaire</th><th>Frais km</th><th>Agence</th><th>Centre</th><th></th>
+      </tr></thead>
+      <tbody id="i-tbody"></tbody>
+      <tfoot id="i-tfoot" style="display:none;">
+        <tr style="background:var(--sur2);border-top:2px solid var(--brd);">
+          <td colspan="3" style="padding:10px 12px;font-size:11px;color:var(--tx2);font-weight:600;">TOTAUX</td>
+          <td style="padding:10px 12px;font-size:11px;font-weight:700;color:var(--grn);" id="i-tot-h">—</td>
+          <td style="padding:10px 12px;"></td>
+          <td style="padding:10px 12px;font-size:11px;font-weight:700;color:var(--grn);" id="i-tot-sal">—</td>
+          <td style="padding:10px 12px;font-size:11px;font-weight:700;color:var(--acc);" id="i-tot-km">—</td>
+          <td colspan="3" style="padding:10px 12px;font-size:12px;font-weight:800;color:var(--acc);font-family:'Syne',sans-serif;" id="i-tot-brut">—</td>
+        </tr>
+        <tr style="background:rgba(74,240,176,.06);border-top:1px solid rgba(74,240,176,.2);">
+          <td colspan="4" style="padding:8px 12px;font-size:11px;color:var(--grn);font-weight:700;">💰 Salaire net du mois en cours</td>
+          <td colspan="6" style="padding:8px 12px;font-size:14px;font-weight:800;color:var(--grn);font-family:'Syne',sans-serif;" id="i-tot-mois">—</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <!-- Filtre mois intérim -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:0 2px;margin-top:6px;">
+    <span style="font-size:11px;color:var(--tx2);" id="i-filter-label">📅 Mois en cours</span>
+    <button class="btn bg" id="i-toggle-all" onclick="toggleInterimAll()" style="font-size:10px;padding:4px 12px;">Voir tout l'historique</button>
+  </div>
+  <div id="i-empty" class="empty-state" style="text-align:center;padding:40px;color:var(--tx3);font-size:12px;">
+    <div style="font-size:30px;margin-bottom:8px;">📋</div>Aucune journée intérim ce mois-ci
+  </div>
+</div>
+
+<!-- ══════════ PANEL CONGES ══════════ -->
+<div class="panel" id="panel-leave">
+  <div class="card">
+    <h3><span class="dot" style="background:var(--pur)"></span>Poser un congé ou repos compensateur</h3>
+    <div class="info leave-info" style="--acc:var(--pur);">
+      <strong style="color:var(--pur)">Congés payés :</strong> Droit annuel <strong style="color:var(--pur)">25 jours</strong> — chaque CP posé est déduit du solde.<br>
+      <strong style="color:var(--pur)">Repos compensateur :</strong> Déduit de vos heures supplémentaires (7h = 1 jour).<br>
+      Les weekends sont automatiquement exclus.
+    </div>
+    <div class="solde-row">
+      <div class="solde-box"><div class="sl">Solde CP restant</div><div class="sv" id="cp-solde">25 j</div></div>
+      <div class="solde-box hs-box"><div class="sl">HS restantes (après repos)</div><div class="sv" id="hs-reste">0h00</div></div>
+    </div>
+    <div class="fields">
+      <label>Date début<input type="date" id="l-from"></label>
+      <label>Date fin (facultatif)<input type="date" id="l-to"></label>
+      <label>Type
+        <select id="l-type">
+          <option value="ferie">🎉 Jour férié (7h)</option>
+          <option value="cp">Congé payé (CP)</option>
+          <option value="repos">Repos compensateur</option>
+          <option value="maladie">Arrêt maladie</option>
+          <option value="autre">Autre absence</option>
+        </select>
+      </label>
+      <label>Note<input type="text" id="l-note" placeholder="Vacances, récupération…"></label>
+    </div>
+    <button class="btn bl" onclick="addLeave()">＋ Poser le(s) jour(s)</button>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Jour</th><th>Type</th><th>Note</th><th></th></tr></thead>
+      <tbody id="l-tbody"></tbody>
+    </table>
+  </div>
+  <div id="l-empty" style="text-align:center;padding:40px;color:var(--tx3);font-size:12px;">
+    <div style="font-size:30px;margin-bottom:8px;">🌴</div>Aucun congé enregistré
+  </div>
+</div>
+
+<!-- ══════════ PANEL BILAN ══════════ -->
+<div class="panel" id="panel-summary">
+  <div class="sgrid">
+    <div class="scard sc-g"><div class="slabel">Heures CDI/CDD</div><div class="sval" style="color:var(--grn)" id="s-wh">0h00</div><div class="ssub" id="s-ws">—</div></div>
+    <div class="scard sc-y"><div class="slabel">Heures Intérim</div><div class="sval" style="color:var(--acc)" id="s-ih">0h00</div><div class="ssub" id="s-is">—</div></div>
+    <div class="scard sc-p"><div class="slabel">Congés / Absences</div><div class="sval" style="color:var(--pur)" id="s-lh">0h00</div><div class="ssub" id="s-ls">CP: 0/25</div></div>
+    <div class="scard sc-t"><div class="slabel">Total général</div><div class="sval" id="s-th">0h00</div><div class="ssub" id="s-ts">—</div></div>
+  </div>
+
+  <!-- CAGNOTTE HS — carte cliquable -->
+  <div id="cagnotte-card" onclick="toggleHSAccordion()" style="background:rgba(240,64,128,.1);border:2px solid rgba(240,64,128,.35);border-radius:var(--r);padding:16px;margin-bottom:0;cursor:pointer;user-select:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div>
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);margin-bottom:3px;">🏦 CAGNOTTE HEURES SUPP. — Cliquez pour le détail</div>
+        <div style="font-size:10px;color:var(--tx3);">HS majorées − repos posés</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--red);line-height:1;" id="s-sh">0h00</div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:2px;" id="s-sh-sub">disponibles</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;font-size:10px;color:var(--tx3);flex-wrap:wrap;">
+      <span>Majorées : <strong style="color:var(--acc)" id="cag-maj">0h00</strong></span>
+      <span>− Repos : <strong style="color:var(--pur)" id="cag-repos">0h00</strong></span>
+      <span>= Net : <strong style="color:var(--red)" id="cag-net">0h00</strong></span>
+      <span id="cag-jours" style="color:var(--grn)"></span>
+    </div>
+  </div>
+
+  <!-- ACCORDÉON DÉTAIL HS -->
+  <div id="hs-bilan-panel" style="display:none;background:var(--sur);border:1px solid rgba(240,64,128,.3);border-top:none;border-radius:0 0 var(--r) var(--r);padding:14px;margin-bottom:14px;">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
+      <span style="font-size:10px;color:var(--tx3);">Voir par :</span>
+      <button type="button" onclick="setBilanFilter('jour')"    id="bf-jour"    class="btn bg" style="font-size:10px;padding:4px 10px;">Jour</button>
+      <button type="button" onclick="setBilanFilter('semaine')" id="bf-semaine" class="btn br" style="font-size:10px;padding:4px 10px;">Semaine ✓</button>
+      <button type="button" onclick="setBilanFilter('mois')"    id="bf-mois"    class="btn bg" style="font-size:10px;padding:4px 10px;">Mois</button>
+      <button type="button" onclick="setBilanFilter('annee')"   id="bf-annee"   class="btn bg" style="font-size:10px;padding:4px 10px;">Année</button>
+    </div>
+    <div id="hs-bilan-content"></div>
+  </div>
+
+  <div class="wsect"><h4>📅 Détail par semaine — CDI/CDD</h4><div id="wk-detail"><p style="color:var(--tx3);font-size:11px;">Aucune donnée.</p></div></div>
+
+  <div class="bkd">
+    <h4>HS CDI/CDD — Détail des majorations</h4>
+    <div class="brow2"><span class="d">Heures normales (≤ 35h/sem)</span><span class="v" style="color:var(--grn)" id="b-n">0h00</span></div>
+    <div style="height:1px;background:rgba(240,192,64,.15);margin:4px 0;"></div>
+    <div class="brow2"><span class="d">HS tranche 1 — entre 36h et 43h</span><span class="v" style="color:var(--acc)" id="b-s1-h">0h00</span></div>
+    <div class="brow2" style="padding-left:14px;"><span class="d" style="font-size:10px;">→ Majoration +25% appliquée</span><span class="v" style="color:var(--acc);font-size:11px" id="b-s1-maj">+ 0h00</span></div>
+    <div class="brow2" style="padding-left:14px;background:rgba(240,192,64,.04);border-radius:4px;"><span class="d" style="font-size:10px;font-weight:600">= Équivalent majoré tranche 1</span><span class="v" style="color:var(--acc);font-weight:700" id="b-s1-tot">0h00</span></div>
+    <div style="height:1px;background:rgba(240,64,128,.15);margin:4px 0;"></div>
+    <div class="brow2"><span class="d">HS tranche 2 — au-delà de 43h</span><span class="v" style="color:var(--red)" id="b-s2-h">0h00</span></div>
+    <div class="brow2" style="padding-left:14px;"><span class="d" style="font-size:10px;">→ Majoration +50% appliquée</span><span class="v" style="color:var(--red);font-size:11px" id="b-s2-maj">+ 0h00</span></div>
+    <div class="brow2" style="padding-left:14px;background:rgba(240,64,128,.04);border-radius:4px;"><span class="d" style="font-size:10px;font-weight:600">= Équivalent majoré tranche 2</span><span class="v" style="color:var(--red);font-weight:700" id="b-s2-tot">0h00</span></div>
+    <div style="height:1px;background:var(--brd);margin:6px 0;"></div>
+    <div class="brow2"><span class="d">Repos compensateur posé</span><span class="v" style="color:var(--pur)" id="b-rc">0 j = 0h00</span></div>
+    <div class="brow2" style="background:rgba(240,64,128,.06);border-radius:6px;padding:8px;margin-top:4px;">
+      <span class="d" style="font-weight:700;font-size:12px;">TOTAL HS MAJORÉES NETTES</span>
+      <span class="v" style="color:var(--red);font-weight:800;font-size:14px;font-family:'Syne',sans-serif;" id="b-sn">0h00</span>
+    </div>
+    <!-- Bouton transformer 7h en repos -->
+    <div id="conv-repos-wrap" style="display:none;margin-top:10px;padding:10px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.3);border-radius:8px;">
+      <div style="font-size:11px;color:var(--pur);margin-bottom:6px;" id="conv-repos-msg"></div>
+      <button class="btn bl" onclick="convertToRepos()" style="font-size:11px;">💤 Poser un jour de repos compensateur (−7h)</button>
+    </div>
+  </div>
+
+  <div class="bkd">
+    <h4>Intérim</h4>
+    <div class="brow2"><span class="d">Heures normales intérim</span><span class="v" style="color:var(--grn)" id="b-in">0h00</span></div>
+    <div class="brow2"><span class="d">HS intérim +25%</span><span class="v" style="color:var(--acc)" id="b-is1">0h00</span></div>
+    <div class="brow2"><span class="d">HS intérim +50%</span><span class="v" style="color:var(--red)" id="b-is2">0h00</span></div>
+    <div class="brow2"><span class="d">Frais km cumulés</span><span class="v" style="color:var(--acc)" id="b-km">0.00 €</span></div>
+    <div class="brow2"><span class="d">Total salaire net intérim</span><span class="v" style="color:var(--grn);font-weight:700" id="b-isal">—</span></div>
+  </div>
+
+  <div class="bkd">
+    <h4>Congés</h4>
+    <div class="brow2"><span class="d">🎉 Jours fériés</span><span class="v" style="color:var(--blu)" id="b-fe">0 j</span></div>
+    <div class="brow2"><span class="d">Congés payés posés</span><span class="v" style="color:var(--pur)" id="b-cp">0 j — solde : 25 j restants</span></div>
+    <div class="brow2"><span class="d">Repos compensateur</span><span class="v" style="color:var(--pur)" id="b-rp">0 j</span></div>
+    <div class="brow2"><span class="d">Arrêts / autres</span><span class="v" style="color:var(--pur)" id="b-ot">0 j</span></div>
+  </div>
+
+  <div class="card">
+    <h4 style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:10px;">📅 Export Google Agenda</h4>
+    <p style="font-size:11px;color:var(--tx3);margin-bottom:12px;">Fichier .ics à importer dans Google Agenda ou tout calendrier iCal.</p>
+    <div class="brow">
+      <button class="btn bm" onclick="exportICS('all')">⬇ Tout</button>
+      <button class="btn bm" onclick="exportICS('work')">⬇ CDI/CDD</button>
+      <button class="btn bm" onclick="exportICS('interim')">⬇ Intérim</button>
+      <button class="btn bm" onclick="exportICS('leave')">⬇ Congés</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4 style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:6px;">💾 Sauvegarde des données</h4>
+    <p style="font-size:11px;color:var(--tx3);margin-bottom:12px;">Exportez vos données en JSON pour les conserver ou les restaurer sur un autre appareil.</p>
+    <div class="brow">
+      <button class="btn bw" onclick="exportJSON()">⬇ Sauvegarder (.json)</button>
+      <button class="btn bg" onclick="document.getElementById('import-file').click()">⬆ Restaurer (.json)</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+    </div>
+  </div>
+
+  <div class="card" id="pwa-card">
+    <h4 style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:6px;">📱 Installer sur votre mobile</h4>
+    <p style="font-size:11px;color:var(--tx3);margin-bottom:12px;" id="pwa-msg">Ajoutez ChronoWork à votre écran d'accueil pour y accéder comme une application.</p>
+    <div class="brow">
+      <button class="btn bw" id="pwa-btn" onclick="installPWA()" style="display:none">📲 Installer l'application</button>
+    </div>
+    <div id="pwa-ios" style="display:none;font-size:11px;color:var(--tx3);line-height:1.8;">
+      Sur iPhone/iPad : appuyez sur <strong style="color:var(--acc)">Partager</strong> (icône carrée avec flèche) puis <strong style="color:var(--acc)">"Sur l'écran d'accueil"</strong>.
+    </div>
+  </div>
+
+  <div class="brow"><button class="btn bg" onclick="resetAll()">🗑 Tout effacer</button></div>
+</div>
+
+<!-- ══════════ PANEL RECAP CHEF ══════════ -->
+<div class="panel" id="panel-report">
+  <div class="card">
+    <h3><span class="dot" style="background:var(--blu)"></span>Récapitulatif à envoyer au chef</h3>
+    <div class="fields">
+      <label>Votre nom<input type="text" id="r-name" placeholder="Prénom NOM"></label>
+      <label>Libellé période<input type="text" id="r-period-lbl" placeholder="Ex: Semaine 20 — mai 2025"></label>
+      <label>Période
+        <select id="r-filter">
+          <option value="all">Toutes les données</option>
+          <option value="week">Semaine en cours</option>
+          <option value="month">Mois en cours</option>
+        </select>
+      </label>
+    </div>
+    <div class="fields">
+      <label>Type de rapport
+        <select id="r-type" onchange="onRTypeChange()">
+          <option value="cdi">CDI/CDD uniquement</option>
+          <option value="interim">Intérim uniquement</option>
+          <option value="both">CDI + Intérim (cumulé)</option>
+        </select>
+      </label>
+      <label id="r-agency-wrap">Agence intérim
+        <select id="r-agency">
+          <option value="all">Toutes les agences</option>
+        </select>
+      </label>
+    </div>
+    <div class="brow">
+      <button class="btn br" onclick="genReport()">⚡ Générer</button>
+      <button class="btn bg" onclick="selectAll()" id="r-sel" style="display:none">☰ Sélectionner tout</button>
+      <button class="btn bm" onclick="mailReport()" id="r-mail" style="display:none">✉ Ouvrir dans mail</button>
+      <button class="btn bg" onclick="dlReport()" id="r-dl" style="display:none">⬇ Télécharger .txt</button>
+      <button class="btn bi" onclick="exportPDF()" id="r-pdf" style="display:none">📄 Exporter PDF</button>
+    </div>
+  </div>
+  <div id="report-out" style="display:none;cursor:text;"></div>
+  <p id="r-hint" style="display:none;font-size:10px;color:var(--tx3);margin-top:6px;">
+    💡 Cliquez sur "Sélectionner tout" puis Ctrl+C pour copier.
+  </p>
+
+  <!-- ACCORDÉON HS DÉTAIL -->
+  <div id="hs-accordion" style="display:none;margin-top:16px;">
+    <button id="hs-toggle-btn" type="button"
+      style="width:100%;background:rgba(240,64,128,.12);border:1px solid rgba(240,64,128,.3);border-radius:9px;padding:13px 16px;color:var(--red);font-family:'DM Mono',monospace;font-size:12px;font-weight:500;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;">
+      <span>📊 Détail calculs HS par semaine — cliquez ici</span>
+      <span id="hs-arrow" style="font-size:14px;">▼</span>
+    </button>
+    <div id="hs-detail-panel" style="display:none;background:var(--sur);border:1px solid rgba(240,64,128,.3);border-top:none;border-radius:0 0 9px 9px;padding:16px;">
+      <div id="hs-detail-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= PANEL GRAPHIQUES ======= -->
+<div class="panel" id="panel-dashboard">
+  <div class="chart-wrap"><h4>📊 Heures CDI/CDD par mois</h4><div class="bar-chart" id="ch-work"></div></div>
+  <div class="chart-wrap"><h4>⚡ Heures supplémentaires par mois</h4><div class="bar-chart" id="ch-hs"></div></div>
+  <div class="chart-wrap"><h4>🚗 Frais km intérim par mois</h4><div class="bar-chart" id="ch-km"></div></div>
+  <div class="chart-wrap"><h4>🌴 Congés par type</h4><div class="bar-chart" id="ch-leave"></div></div>
+</div>
+
+<!-- ======= PANEL HISTORIQUE ======= -->
+<div class="panel" id="panel-history">
+  <div class="card">
+    <h3><span class="dot" style="background:#f6ad55"></span>Historique</h3>
+    <div class="fields">
+      <label>Année
+        <select id="hist-year" onchange="renderHistory()">
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026" selected>2026</option>
+          <option value="2027">2027</option>
+        </select>
+      </label>
+      <label>Vue
+        <select id="hist-type" onchange="renderHistory()">
+          <option value="work">💼 CDI/CDD</option>
+          <option value="interim">🔶 Intérim</option>
+          <option value="both-split">📊 Comparaison CDI vs Intérim</option>
+          <option value="both">∑ Cumul total</option>
+        </select>
+      </label>
+    </div>
+    <!-- Barre de recherche -->
+    <div style="margin-top:8px;">
+      <label style="font-size:11px;color:var(--tx2);display:flex;flex-direction:column;gap:4px;">
+        🔍 Rechercher une date ou période
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="date" id="hist-search" oninput="renderHistSearch()" style="flex:1">
+          <button class="btn bg" onclick="document.getElementById('hist-search').value='';renderHistSearch();" style="font-size:10px;padding:4px 10px;">✕ Effacer</button>
+        </div>
+      </label>
+    </div>
+  </div>
+  <!-- Résultats de recherche -->
+  <div id="hist-search-results" style="display:none;margin-bottom:14px;"></div>
+  <!-- Détail mois (s'ouvre au clic sur une carte) -->
+  <div id="hist-month-detail" style="display:none;margin-bottom:14px;">
+    <div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--sur2);border-bottom:1px solid var(--brd);">
+        <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:14px;" id="hist-detail-title">—</span>
+        <button onclick="document.getElementById('hist-month-detail').style.display='none'" class="btn bg" style="font-size:11px;padding:4px 12px;">✕ Fermer</button>
+      </div>
+      <div id="hist-detail-body" style="padding:14px;"></div>
+    </div>
+  </div>
+  <!-- Cartes mensuelles -->
+  <div id="hist-months"></div>
+  <div class="chart-wrap"><h4>Comparaison mois par mois</h4><div class="bar-chart" id="ch-compare"></div></div>
+</div>
+
+<!-- ======= PANEL RAPPELS ======= -->
+<div class="panel" id="panel-notif">
+  <div class="card">
+    <h3><span class="dot" style="background:#9ae6b4"></span>Rappels de saisie</h3>
+    <div class="info">Configurez des rappels pour ne pas oublier de saisir vos heures.</div>
+    <div style="margin-bottom:12px;">
+      <button class="btn bw" onclick="askNotifPerm()">🔔 Activer les notifications</button>
+      <span id="notif-status" style="font-size:11px;color:var(--tx3);margin-left:10px;"></span>
+    </div>
+    <div class="fields">
+      <label>Jour
+        <select id="notif-day">
+          <option value="1">Lundi</option><option value="2">Mardi</option>
+          <option value="3">Mercredi</option><option value="4">Jeudi</option>
+          <option value="5" selected>Vendredi</option>
+        </select>
+      </label>
+      <label>Heure<input type="time" id="notif-time" value="18:00"></label>
+      <label>Message<input type="text" id="notif-msg" value="Saisir vos heures !"></label>
+    </div>
+    <button class="btn bw" onclick="addNotif()">＋ Ajouter ce rappel</button>
+  </div>
+  <div id="notif-list"></div>
+  <div id="notif-empty" style="text-align:center;padding:30px;color:var(--tx3);font-size:12px;">
+    <div style="font-size:28px;margin-bottom:8px;">🔔</div>Aucun rappel configuré
+  </div>
+</div>
+
+</div><!-- /app -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//  CONSTANTES
+// ════════════════════════════════════════════
+const W35 = 35*60;   // 2100 min — seuil hebdo HS
+const W43 = 43*60;   // 2580 min — seuil tranche 2
+const DAY9 = 9*60;   // 540 min — journée type
+const DAY7 = 7*60;   // 420 min — congé / repos
+const CP_TOTAL = 25; // droit annuel CP
+
+const JF = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+const MF = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+
+// Barème fiscal 2024 — taux au km (tranche intermédiaire 5001-20000 km)
+const KM_BAREME = {3:0.529, 4:0.606, 5:0.636, 6:0.665, 7:0.697};
+
+const LEAVE_LBL = {ferie:'Jour férié',cp:'Congé payé',repos:'Repos compensateur',maladie:'Arrêt maladie',autre:'Autre absence'};
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let entries = JSON.parse(localStorage.getItem('cw4_e')||'[]');
+let nid     = parseInt(localStorage.getItem('cw4_n')||'1');
+function save(){ localStorage.setItem('cw4_e',JSON.stringify(entries)); localStorage.setItem('cw4_n',String(nid)); }
+
+// ════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════
+const tMin = t => { const[h,m]=t.split(':').map(Number); return h*60+m; };
+const hhmm = m => { const n=m<0; m=Math.abs(m); return (n?'−':'')+Math.floor(m/60)+'h'+String(m%60).padStart(2,'0'); };
+const dStr = d => { const[y,mo,da]=d.split('-'); return JF[new Date(d).getDay()]+' '+da+'/'+mo+'/'+y; };
+const fmtD = d => d.toISOString().split('T')[0];
+const isWE = d => { const w=new Date(d).getDay(); return w===0||w===6; };
+const addD = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return fmtD(x); };
+
+function isoWeek(ds){
+  const d=new Date(ds); d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+3-(d.getDay()+6)%7);
+  const w1=new Date(d.getFullYear(),0,4);
+  return d.getFullYear()+'-W'+String(1+Math.round(((d-w1)/86400000-3+(w1.getDay()+6)%7)/7)).padStart(2,'0');
+}
+
+// Jours fériés France
+function feries(yr){
+  const jf=[yr+'-01-01',yr+'-05-01',yr+'-05-08',yr+'-07-14',yr+'-08-15',yr+'-11-01',yr+'-11-11',yr+'-12-25'];
+  const a=yr%19,b=Math.floor(yr/100),c=yr%100,dd=Math.floor(b/4),e=b%4;
+  const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-dd-g+15)%30;
+  const i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,mo=Math.floor((a+11*h+22*l)/451);
+  const mth=Math.floor((h+l-7*mo+114)/31), dy=((h+l-7*mo+114)%31)+1;
+  const paq=new Date(yr,mth-1,dy);
+  [[1],[39],[50]].forEach(([n])=>{ const x=new Date(paq); x.setDate(paq.getDate()+n); jf.push(fmtD(x)); });
+  return new Set(jf);
+}
+function isFerie(ds){ return feries(parseInt(ds.substring(0,4))).has(ds); }
+
+function calcKm(km,cv){ return Math.round(km*2*(KM_BAREME[cv]||KM_BAREME[5])*100)/100; }
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  const t=new Date();
+  ['w-date','i-date','l-from','l-to'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=fmtD(t); });
+  const mon=new Date(t); mon.setDate(t.getDate()-((t.getDay()||7)-1));
+  const sun=new Date(mon); sun.setDate(mon.getDate()+6);
+  document.getElementById('wk-label').textContent=mon.getDate()+' '+MF[mon.getMonth()]+' → '+sun.getDate()+' '+MF[sun.getMonth()];
+
+  // Accordéon HS
+  const hsTgl=document.getElementById('hs-toggle-btn');
+  if(hsTgl) hsTgl.addEventListener('click', function(e){ e.stopPropagation(); toggleHSDetail(); });
+
+  // Année courante dans l'historique
+  const curYear=new Date().getFullYear().toString();
+  const histSel=document.getElementById('hist-year');
+  if(histSel) Array.from(histSel.options).forEach(o=>{ if(o.value===curYear) o.selected=true; });
+
+  // Agence filter init
+  onRTypeChange();
+
+  renderAll();
+  refreshLeave();
+  scheduleNotifs();
+  setupPWA();
+});
+
+// ════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════
+function go(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab.'+name).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='summary') updateSummary();
+  if(name==='dashboard') renderDashboard();
+  if(name==='history') renderHistory();
+  if(name==='notif') renderNotifList();
+  if(name==='report'){
+    document.getElementById('report-out').style.display='none';
+    ['r-sel','r-mail','r-dl','r-hint'].forEach(x=>{ const el=document.getElementById(x); if(el) el.style.display='none'; });
+    const rp=document.getElementById('r-pdf'); if(rp) rp.style.display='none';
+    const ha=document.getElementById('hs-accordion'); if(ha) ha.style.display='none';
+  }
+}
+
+// ════════════════════════════════════════════
+//  CUSTOM CENTRE
+// ════════════════════════════════════════════
+function toggleCustom(p){
+  const v=document.getElementById(p+'-site').value;
+  const lbl=document.getElementById(p+'-autre-lbl');
+  lbl.style.display=v==='__autre__'?'flex':'none';
+  if(v!=='__autre__') document.getElementById(p+'-autre').value='';
+}
+function getSite(p){
+  const v=document.getElementById(p+'-site').value;
+  if(v==='__autre__') return document.getElementById(p+'-autre').value.trim()||'Autre';
+  return v;
+}
+
+// ════════════════════════════════════════════
+//  PREVIEWS
+// ════════════════════════════════════════════
+function previewTravel(){
+  const date=document.getElementById('w-date').value;
+  const min=parseInt(document.getElementById('w-travel').value)||0;
+  const tType=document.getElementById('w-travel-type').value;
+  const el=document.getElementById('w-preview');
+  if(!date||!min){ el.textContent=''; return; }
+
+  const f=isFerie(date);
+  if(f){ el.textContent='🚫 Jour férié — aucun trajet ajouté'; return; }
+  if(tType==='none'){ el.textContent='✖ Aucun trajet pour ce jour'; return; }
+  if(tType==='aller'){ el.textContent='🚗 Trajet ALLER forcé : +'+min+' min ajouté'; return; }
+  if(tType==='retour'){ el.textContent='🏠 Trajet RETOUR forcé : +'+min+' min ajouté'; return; }
+
+  // Mode auto
+  const dow=new Date(date).getDay();
+  if(dow===1) el.textContent='🚗 Lundi → trajet ALLER +'+min+' min';
+  else if(dow===2){
+    const lundi=addD(date,-1);
+    const lundiAbsent=isFerie(lundi)||!entries.find(e=>e.type==='work'&&e.date===lundi);
+    if(lundiAbsent) el.textContent='🚗 Mardi (lundi absent/férié) → trajet ALLER reporté +'+min+' min';
+    else el.textContent='ℹ️ Mardi — lundi travaillé, pas de trajet auto. Choisissez "Aller (forcer)" si besoin.';
+  }
+  else if(dow===4) el.textContent='🏠 Jeudi → trajet RETOUR +'+min+' min';
+  else if(dow===3){
+    const jeudi=addD(date,1);
+    if(isFerie(jeudi)) el.textContent='🏠 Mercredi (jeudi férié) → trajet RETOUR reporté +'+min+' min';
+    else el.textContent='ℹ️ Mercredi — jeudi non férié, pas de trajet auto. Choisissez "Retour (forcer)" si besoin.';
+  }
+  else el.textContent='ℹ️ Pas de trajet auto ce jour. Utilisez "Aller (forcer)" ou "Retour (forcer)" si nécessaire.';
+}
+
+function previewKm(){
+  const km=parseFloat(document.getElementById('i-km').value)||0;
+  const cv=parseInt(document.getElementById('i-cv').value)||5;
+  const el=document.getElementById('i-km-prev');
+  if(km<=0){ el.textContent=''; return; }
+  const f=calcKm(km,cv);
+  el.textContent='🚗 '+km+' km aller × 2 = '+(km*2)+' km A/R → '+f.toFixed(2)+' € (barème '+KM_BAREME[cv]+'€/km, '+cv+'CV)';
+}
+
+// ════════════════════════════════════════════
+//  ADD WORK
+// ════════════════════════════════════════════
+function addWork(){
+  const date=document.getElementById('w-date').value;
+  const start=document.getElementById('w-start').value;
+  const end=document.getElementById('w-end').value;
+  const brk=parseInt(document.getElementById('w-break').value)||0;
+  const travel=parseInt(document.getElementById('w-travel').value)||0;
+  const site=getSite('w');
+
+  if(!date||!start||!end){ toast('Remplissez la date et les horaires.','err'); return; }
+
+  // Anti-doublon
+  if(entries.find(e=>e.type==='work'&&e.date===date)){
+    toast('⚠️ Attention : le '+dStr(date)+' est déjà enregistré. Vérifiez avant de continuer.','warn'); return;
+  }
+
+  let s=tMin(start),e=tMin(end);
+  if(e<=s) e+=1440;
+  const netWork=e-s-brk;
+  if(netWork<=0){ toast('Durée nette invalide.','err'); return; }
+
+  // Trajet = temps de travail
+  // Mode auto : lundi=aller, jeudi=retour (avec report si férié)
+  // Mode manuel : l'utilisateur force aller ou retour quel que soit le jour
+  const dow=new Date(date).getDay();
+  const f=isFerie(date);
+  const tType=document.getElementById('w-travel-type').value;
+  let travelMin=0, travelType='';
+
+  if(travel>0 && !f && tType!=='none'){
+    if(tType==='aller'){
+      travelMin=travel; travelType='aller';
+    } else if(tType==='retour'){
+      travelMin=travel; travelType='retour';
+    } else {
+      // Mode auto
+      if(dow===1){
+        travelMin=travel; travelType='aller';
+      } else if(dow===2){
+        // Mardi : aller si lundi était férié OU si lundi absent des entrées
+        const lundi=addD(date,-1);
+        const lundiAbsent=isFerie(lundi)||!entries.find(e=>e.type==='work'&&e.date===lundi);
+        if(lundiAbsent){ travelMin=travel; travelType='aller (report mardi)'; }
+      } else if(dow===4){
+        travelMin=travel; travelType='retour';
+      } else if(dow===3){
+        // Mercredi : retour si jeudi est férié
+        const jeudi=addD(date,1);
+        if(isFerie(jeudi)){ travelMin=travel; travelType='retour (report mercredi)'; }
+      }
+    }
+  }
+  const netTotal=netWork+travelMin;
+
+  entries.push({id:nid++,type:'work',date,start,end,break:brk,netWork,travelMin,travelType,netMin:netTotal,site});
+  save(); renderAll(); refreshLeave();
+  toast('✓ '+dStr(date)+' : '+hhmm(netWork)+(travelMin?' + '+hhmm(travelMin)+' trajet '+travelType+' = '+hhmm(netTotal):''));
+  document.getElementById('w-site').value='';
+  document.getElementById('w-autre-lbl').style.display='none';
+  document.getElementById('w-preview').textContent='';
+}
+
+// ════════════════════════════════════════════
+//  ADD INTERIM
+// ════════════════════════════════════════════
+function previewSal(){
+  const start=document.getElementById('i-start').value;
+  const end=document.getElementById('i-end').value;
+  const brk=parseInt(document.getElementById('i-break').value)||0;
+  const rate=parseFloat(document.getElementById('i-rate').value)||0;
+  const el=document.getElementById('i-sal-prev');
+  if(!start||!end||!rate){ el.textContent=''; return; }
+  let s=tMin(start),e=tMin(end);
+  if(e<=s) e+=1440;
+  const net=(e-s-brk)/60;
+  if(net<=0){ el.textContent=''; return; }
+  const sal=net*rate;
+  el.textContent='💰 '+net.toFixed(2)+'h × '+rate.toFixed(2)+' €/h = '+sal.toFixed(2)+' € net';
+}
+
+function addInterim(){
+  const date=document.getElementById('i-date').value;
+  const start=document.getElementById('i-start').value;
+  const end=document.getElementById('i-end').value;
+  const brk=parseInt(document.getElementById('i-break').value)||0;
+  const agency=document.getElementById('i-agency').value||'—';
+  const site=getSite('i');
+  const km=parseFloat(document.getElementById('i-km').value)||0;
+  const cv=parseInt(document.getElementById('i-cv').value)||5;
+  const rate=parseFloat(document.getElementById('i-rate').value)||0;
+
+  if(!date||!start||!end){ toast('Remplissez la date et les horaires.','err'); return; }
+
+  if(entries.find(e=>e.type==='interim'&&e.date===date)){
+    toast('⚠️ Attention : le '+dStr(date)+' est déjà enregistré en intérim.','warn'); return;
+  }
+
+  let s=tMin(start),e=tMin(end);
+  if(e<=s) e+=1440;
+  const net=e-s-brk;
+  if(net<=0){ toast('Durée nette invalide.','err'); return; }
+
+  const fraisKm=km>0?calcKm(km,cv):0;
+  const sal=rate>0?(net/60)*rate:0;
+  entries.push({id:nid++,type:'interim',date,start,end,break:brk,netMin:net,netWork:net,travelMin:0,travelType:'',agency,site,km,cv,fraisKm,rate,sal});
+  save(); renderAll(); refreshLeave();
+  const parts=['✓ Intérim '+dStr(date)];
+  if(sal>0) parts.push(hhmm(net)+' × '+rate.toFixed(2)+'€ = '+sal.toFixed(2)+'€ net');
+  if(fraisKm>0) parts.push(fraisKm.toFixed(2)+'€ km');
+  toast(parts.join(' · '));
+  document.getElementById('i-site').value='';
+  document.getElementById('i-autre-lbl').style.display='none';
+  document.getElementById('i-km').value='';
+  document.getElementById('i-km-prev').textContent='';
+  document.getElementById('i-rate').value='';
+  document.getElementById('i-sal-prev').textContent='';
+}
+
+// ════════════════════════════════════════════
+//  ADD LEAVE
+// ════════════════════════════════════════════
+function addLeave(){
+  const from=document.getElementById('l-from').value;
+  const to=document.getElementById('l-to').value||from;
+  const type=document.getElementById('l-type').value;
+  const note=document.getElementById('l-note').value;
+  if(!from){ toast('Sélectionnez une date.','err'); return; }
+  if(to<from){ toast('Date fin avant date début.','err'); return; }
+  let cur=from, count=0;
+  while(cur<=to){
+    if(!isWE(cur)){
+      entries.push({id:nid++,type:'leave',date:cur,leaveType:type,netMin:DAY7,note,start:'—',end:'—'});
+      count++;
+    }
+    cur=addD(cur,1);
+  }
+  save(); renderAll(); refreshLeave();
+  toast('✓ '+count+' jour(s) posé(s)');
+  document.getElementById('l-note').value='';
+}
+
+// ════════════════════════════════════════════
+//  DELETE
+// ════════════════════════════════════════════
+function del(id){
+  entries=entries.filter(e=>e.id!==id);
+  save(); renderAll(); refreshLeave();
+  if(document.getElementById('panel-summary').classList.contains('active')) updateSummary();
+  toast('Entrée supprimée.');
+}
+
+// ════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════
+function renderAll(){ renderWork(); renderInterim(); renderLeave(); }
+
+let showAllWork=false, showAllInterim=false;
+
+function toggleWorkAll(){
+  showAllWork=!showAllWork;
+  const btn=document.getElementById('w-toggle-all');
+  const lbl=document.getElementById('w-filter-label');
+  if(btn) btn.textContent=showAllWork?'Mois en cours seulement':'Voir tout l\'historique';
+  if(lbl) lbl.textContent=showAllWork?'📋 Tout l\'historique':'📅 Mois en cours';
+  renderWork();
+}
+
+function toggleInterimAll(){
+  showAllInterim=!showAllInterim;
+  const btn=document.getElementById('i-toggle-all');
+  const lbl=document.getElementById('i-filter-label');
+  if(btn) btn.textContent=showAllInterim?'Mois en cours seulement':'Voir tout l\'historique';
+  if(lbl) lbl.textContent=showAllInterim?'📋 Tout l\'historique':'📅 Mois en cours';
+  renderInterim();
+}
+
+function renderWork(){
+  const tb=document.getElementById('w-tbody');
+  const em=document.getElementById('w-empty');
+  const curMonth=new Date().toISOString().substring(0,7);
+  const all=entries.filter(e=>e.type==='work').sort((a,b)=>a.date.localeCompare(b.date));
+  const list=showAllWork?all:all.filter(e=>e.date.startsWith(curMonth));
+  if(!list.length){
+    tb.innerHTML='';
+    em.style.display='block';
+    em.innerHTML=showAllWork
+      ?'<div style="font-size:30px;margin-bottom:8px;">🕐</div>Aucune journée CDI/CDD'
+      :'<div style="font-size:30px;margin-bottom:8px;">🕐</div>Aucune journée CDI/CDD ce mois-ci<br><small style="color:var(--tx3)">Cliquez "Voir tout" pour voir l\'historique</small>';
+    return;
+  }
+  em.style.display='none';
+  tb.innerHTML=list.map(e=>{
+    const tw=e.travelMin||0;
+    const nw=e.netWork||e.netMin;
+    const tot=e.netMin;
+    const tCell=tw>0?'<span style="color:var(--acc)">+'+hhmm(tw)+'<br><small style="color:var(--tx3)">'+e.travelType+'</small></span>':'<span style="color:var(--tx3)">—</span>';
+    const hs=tot>DAY9?'<span class="badge b-red" style="margin-left:4px">HS</span>':'';
+    return`<tr>
+      <td>${dStr(e.date)}</td>
+      <td style="color:var(--grn)">${e.start}</td>
+      <td style="color:var(--red)">${e.end}</td>
+      <td style="color:var(--tx3)">${e.break}min</td>
+      <td>${hhmm(nw)}</td>
+      <td>${tCell}</td>
+      <td><strong>${hhmm(tot)}</strong>${hs}</td>
+      <td style="color:var(--tx2)">${e.site||'—'}</td>
+      <td><button class="btn bd" onclick="del(${e.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderInterim(){
+  const tb=document.getElementById('i-tbody');
+  const em=document.getElementById('i-empty');
+  const tf=document.getElementById('i-tfoot');
+  const curMonth=new Date().toISOString().substring(0,7);
+  const all=entries.filter(e=>e.type==='interim').sort((a,b)=>a.date.localeCompare(b.date));
+  const list=showAllInterim?all:all.filter(e=>e.date.startsWith(curMonth));
+  if(!list.length){
+    tb.innerHTML=''; tf.style.display='none'; em.style.display='block';
+    em.innerHTML=showAllInterim
+      ?'<div style="font-size:30px;margin-bottom:8px;">📋</div>Aucune journée intérim'
+      :'<div style="font-size:30px;margin-bottom:8px;">📋</div>Aucune journée intérim ce mois-ci<br><small style="color:var(--tx3)">Cliquez "Voir tout" pour voir l\'historique</small>';
+    return;
+  }
+  em.style.display='none';
+
+  let totH=0, totSal=0, totKm=0;
+
+  // Salaire net du mois en cours
+  const curMonthSal=new Date().toISOString().substring(0,7);
+  let moisSal=0, moisH=0;
+
+  tb.innerHTML=list.map(e=>{
+    const hs=e.netMin>DAY9?'<span class="badge b-red" style="margin-left:4px">HS</span>':'';
+    const kmCell=e.fraisKm>0
+      ?`<span style="color:var(--acc)">${e.fraisKm.toFixed(2)} €<br><small style="color:var(--tx3)">${(e.km||0)*2}km (${e.cv||5}CV)</small></span>`
+      :'<span style="color:var(--tx3)">—</span>';
+    const rate=e.rate||0;
+    const sal=rate>0?(e.netMin/60)*rate:0;
+    totH+=e.netMin; totSal+=sal; totKm+=(e.fraisKm||0);
+    // Cumul mois courant
+    if(e.date.startsWith(curMonthSal)){ moisSal+=sal; moisH+=e.netMin; }
+    return`<tr>
+      <td>${dStr(e.date)}</td>
+      <td style="color:var(--grn)">${e.start}</td>
+      <td style="color:var(--red)">${e.end}</td>
+      <td>${hhmm(e.netMin)}${hs}</td>
+      <td style="color:var(--acc)">${rate>0?rate.toFixed(2)+' €/h':'<span style="color:var(--tx3)">—</span>'}</td>
+      <td style="color:var(--grn);font-weight:600">${sal>0?sal.toFixed(2)+' €<br><small style="color:var(--tx3);font-weight:400">'+hhmm(e.netMin)+'×'+rate.toFixed(0)+'€</small>':'<span style="color:var(--tx3)">—</span>'}</td>
+      <td>${kmCell}</td>
+      <td><span class="badge b-acc">${e.agency||'—'}</span></td>
+      <td style="color:var(--tx2)">${e.site||'—'}</td>
+      <td><button class="btn bd" onclick="del(${e.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+
+  // Totaux footer
+  tf.style.display='table-footer-group';
+  document.getElementById('i-tot-h').textContent=hhmm(totH);
+  document.getElementById('i-tot-sal').textContent=totSal>0?totSal.toFixed(2)+' €':'—';
+  document.getElementById('i-tot-km').textContent=totKm>0?totKm.toFixed(2)+' €':'—';
+  document.getElementById('i-tot-brut').textContent='Total brut : '+(totSal+totKm).toFixed(2)+' €';
+
+  // Mois courant
+  const moisEl=document.getElementById('i-tot-mois');
+  if(moisEl){
+    const MF2=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+    const moisNom=MF2[new Date().getMonth()]+' '+new Date().getFullYear();
+    moisEl.innerHTML=moisSal>0
+      ?`${moisSal.toFixed(2)} € <span style="font-size:10px;font-weight:400;color:var(--tx3)">(${hhmm(moisH)} travaillées en ${moisNom})</span>`
+      :`— <span style="font-size:10px;color:var(--tx3)">Aucune donnée pour ${moisNom}</span>`;
+  }
+}
+
+function renderLeave(){
+  const tb=document.getElementById('l-tbody');
+  const em=document.getElementById('l-empty');
+  const list=entries.filter(e=>e.type==='leave').sort((a,b)=>a.date.localeCompare(b.date));
+  if(!list.length){ tb.innerHTML=''; em.style.display='block'; return; }
+  em.style.display='none';
+  tb.innerHTML=list.map(e=>`<tr>
+    <td>${dStr(e.date)}</td>
+    <td><span class="badge b-pur">${LEAVE_LBL[e.leaveType]||e.leaveType}</span></td>
+    <td style="color:var(--tx2)">${e.note||'—'}</td>
+    <td><button class="btn bd" onclick="del(${e.id})">✕</button></td>
+  </tr>`).join('');
+}
+
+// ════════════════════════════════════════════
+//  REFRESH LEAVE COUNTERS (toujours à jour)
+// ════════════════════════════════════════════
+function refreshLeave(){
+  const lList=entries.filter(e=>e.type==='leave');
+  const cpN=lList.filter(e=>e.leaveType==='cp').length;
+  const rcN=lList.filter(e=>e.leaveType==='repos').length;
+  const cpR=Math.max(0,CP_TOTAL-cpN);
+  // HS brutes CDI
+  const wC=calcOT(entries.filter(e=>e.type==='work'));
+  const hsB=wC.s1+wC.s2;
+  const hsN=Math.max(0,hsB-rcN*DAY7);
+  const cpEl=document.getElementById('cp-solde');
+  const hsEl=document.getElementById('hs-reste');
+  if(cpEl){ cpEl.textContent=cpR+' j'; cpEl.style.color=cpR<5?'var(--red)':'var(--pur)'; }
+  if(hsEl) hsEl.textContent=hhmm(hsN);
+}
+
+// ════════════════════════════════════════════
+//  CALCUL HS PAR SEMAINE
+//  Base 35h/semaine. Trajet inclus dans netMin.
+//  Tranche 1 : 36h-43h → +25%
+//  Tranche 2 : ≥44h    → +50%
+// ════════════════════════════════════════════
+function calcOT(list){
+  const wks={};
+  list.forEach(e=>{ const w=isoWeek(e.date); if(!wks[w])wks[w]=[]; wks[w].push(e); });
+  let norm=0,s1=0,s2=0,wages=0;
+  const det=[];
+  Object.entries(wks).sort().forEach(([wk,wE])=>{
+    const tot=wE.reduce((a,e)=>a+e.netMin,0);
+    const n=Math.min(tot,W35);
+    const t1=Math.max(0,Math.min(tot,W43)-W35);
+    const t2=Math.max(0,tot-W43);
+    norm+=n; s1+=t1; s2+=t2;
+    det.push({wk,tot,s1:t1,s2:t2});
+  });
+  return{norm,s1,s2,wages,det};
+}
+
+// ════════════════════════════════════════════
+//  SUMMARY
+// ════════════════════════════════════════════
+function updateSummary(){
+  const wC=calcOT(entries.filter(e=>e.type==='work'));
+  const iC=calcOT(entries.filter(e=>e.type==='interim'));
+  const lList=entries.filter(e=>e.type==='leave');
+  const wT=entries.filter(e=>e.type==='work').reduce((a,e)=>a+e.netMin,0);
+  const iT=entries.filter(e=>e.type==='interim').reduce((a,e)=>a+e.netMin,0);
+  const lT=lList.reduce((a,e)=>a+e.netMin,0);
+
+  const cpN=lList.filter(e=>e.leaveType==='cp').length;
+  const rcN=lList.filter(e=>e.leaveType==='repos').length;
+  const cpR=Math.max(0,CP_TOTAL-cpN);
+  const hsB=wC.s1+wC.s2;
+  const hsN=Math.max(0,hsB-rcN*DAY7);
+  const iHsB=iC.s1+iC.s2;
+  const totalKm=entries.filter(e=>e.type==='interim').reduce((a,e)=>a+(e.fraisKm||0),0);
+
+  document.getElementById('s-wh').textContent=hhmm(wT);
+  document.getElementById('s-ws').textContent=(wC.s1+wC.s2>0?'dont HS: '+hhmm(wC.s1+wC.s2):'pas de HS');
+  document.getElementById('s-ih').textContent=hhmm(iT);
+  document.getElementById('s-is').textContent=totalKm>0?'Frais km: '+totalKm.toFixed(2)+' €':'—';
+  document.getElementById('s-sh').textContent=hhmm(hsN);
+  document.getElementById('s-lh').textContent=hhmm(lT);
+  document.getElementById('s-ls').textContent='CP: '+cpN+'/'+CP_TOTAL+' · RC: '+rcN+' j';
+  document.getElementById('s-th').textContent=hhmm(wT+iT+lT);
+  document.getElementById('s-ts').textContent='CDI+Intérim: '+hhmm(wT+iT);
+
+  document.getElementById('b-n').textContent=hhmm(wC.norm);
+
+  // Tranche 1 : heures × 25% = majoration, total = heures + majoration
+  const s1Maj=Math.round(wC.s1*0.25);
+  const s1Tot=wC.s1+s1Maj;
+  document.getElementById('b-s1-h').textContent=hhmm(wC.s1);
+  document.getElementById('b-s1-maj').textContent='+ '+hhmm(s1Maj);
+  document.getElementById('b-s1-tot').textContent=hhmm(s1Tot);
+
+  // Tranche 2 : heures × 50% = majoration, total = heures + majoration
+  const s2Maj=Math.round(wC.s2*0.5);
+  const s2Tot=wC.s2+s2Maj;
+  document.getElementById('b-s2-h').textContent=hhmm(wC.s2);
+  document.getElementById('b-s2-maj').textContent='+ '+hhmm(s2Maj);
+  document.getElementById('b-s2-tot').textContent=hhmm(s2Tot);
+
+  document.getElementById('b-rc').textContent=rcN+' j = '+hhmm(rcN*DAY7)+' déduit';
+  // HS nettes = (s1Tot + s2Tot) - repos
+  const hsMajTotal=s1Tot+s2Tot;
+  const hsNMaj=Math.max(0,hsMajTotal-rcN*DAY7);
+  document.getElementById('b-sn').textContent=hhmm(hsNMaj);
+
+  // Cagnotte card
+  document.getElementById('s-sh').textContent=hhmm(hsNMaj);
+  document.getElementById('s-sh-sub').textContent=hsNMaj>0?'à récupérer':'aucune disponible';
+  document.getElementById('cag-maj').textContent=hhmm(hsMajTotal);
+  document.getElementById('cag-repos').textContent=hhmm(rcN*DAY7);
+  document.getElementById('cag-net').textContent=hhmm(hsNMaj);
+  const joursDispos=Math.floor(hsNMaj/DAY7);
+  document.getElementById('cag-jours').textContent=joursDispos>0?'= '+joursDispos+' jour(s) de repos dispo':'';
+
+  // Bouton conversion repos si ≥ 7h
+  const convWrap=document.getElementById('conv-repos-wrap');
+  const convMsg=document.getElementById('conv-repos-msg');
+  if(hsNMaj>=DAY7){
+    convWrap.style.display='block';
+    convMsg.textContent='Vous avez '+hhmm(hsNMaj)+' de HS majorées — vous pouvez poser un jour de repos compensateur (7h).';
+  } else {
+    convWrap.style.display='none';
+  }
+
+  // Intérim
+  document.getElementById('b-in').textContent=hhmm(iC.norm);
+  document.getElementById('b-is1').textContent=hhmm(iC.s1);
+  document.getElementById('b-is2').textContent=hhmm(iC.s2);
+  document.getElementById('b-km').textContent=totalKm.toFixed(2)+' €';
+  // Total salaire net intérim
+  const iSalTotal=entries.filter(e=>e.type==='interim').reduce((a,e)=>a+(e.rate>0?(e.netMin/60)*e.rate:0),0);
+  const bISal=document.getElementById('b-isal');
+  if(bISal) bISal.textContent=iSalTotal>0?iSalTotal.toFixed(2)+' €':'— (taux non saisi)';
+
+  document.getElementById('b-cp').textContent=cpN+' j posés — solde: '+cpR+' j restants / '+CP_TOTAL;
+  document.getElementById('b-rp').textContent=rcN+' j posés = '+hhmm(rcN*DAY7)+' déduit des HS';
+  document.getElementById('b-ot').textContent=(lList.filter(e=>e.leaveType==='maladie'||e.leaveType==='autre').length)+' j';
+  document.getElementById('b-fe').textContent=lList.filter(e=>e.leaveType==='ferie').length+' j';
+
+  renderWeeksDetail(wC.det);
+  // Rafraîchir accordéon si ouvert
+  if(document.getElementById('hs-bilan-panel').style.display==='block') renderHSBilan();
+  refreshLeave();
+}
+
+// ============================================
+//  CAGNOTTE HS — ACCORDÉON BILAN
+// ============================================
+let bilanFilter='semaine';
+
+function toggleHSAccordion(){
+  const panel=document.getElementById('hs-bilan-panel');
+  const card=document.getElementById('cagnotte-card');
+  const open=panel.style.display==='block';
+  panel.style.display=open?'none':'block';
+  card.style.borderRadius=open?'var(--r)':'var(--r) var(--r) 0 0';
+  if(!open) renderHSBilan();
+}
+
+function setBilanFilter(f){
+  bilanFilter=f;
+  ['jour','semaine','mois','annee'].forEach(x=>{
+    const btn=document.getElementById('bf-'+x);
+    if(!btn) return;
+    btn.className='btn '+(x===f?'br':'bg');
+    btn.style.fontSize='10px'; btn.style.padding='4px 10px';
+    btn.textContent={jour:'Jour',semaine:'Semaine',mois:'Mois',annee:'Année'}[x]+(x===f?' ✓':'');
+  });
+  renderHSBilan();
+}
+
+function renderHSBilan(){
+  const c=document.getElementById('hs-bilan-content');
+  const work=entries.filter(e=>e.type==='work').sort((a,b)=>a.date.localeCompare(b.date));
+  if(!work.length){ c.innerHTML='<p style="color:var(--tx3);font-size:11px;padding:8px 0;">Aucune journée enregistrée.</p>'; return; }
+  const groups={};
+  work.forEach(e=>{
+    let key;
+    if(bilanFilter==='jour')         key=e.date;
+    else if(bilanFilter==='semaine') key=isoWeek(e.date);
+    else if(bilanFilter==='mois')    key=e.date.substring(0,7);
+    else                              key=e.date.substring(0,4);
+    if(!groups[key])groups[key]=[];
+    groups[key].push(e);
+  });
+  const MN=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  let html='', cumHSReel=0, cumHSMaj=0;
+  Object.entries(groups).sort().forEach(([key,gE])=>{
+    const totH=gE.reduce((a,e)=>a+e.netMin,0);
+    const wks={};
+    gE.forEach(e=>{ const w=isoWeek(e.date); if(!wks[w])wks[w]=0; wks[w]+=e.netMin; });
+    let s1=0,s2=0;
+    Object.values(wks).forEach(t=>{ s1+=Math.max(0,Math.min(t,W43)-W35); s2+=Math.max(0,t-W43); });
+    const hs=s1+s2, s1m=Math.round(s1*0.25), s2m=Math.round(s2*0.5), hsM=hs+s1m+s2m;
+    cumHSReel+=hs; cumHSMaj+=hsM;
+    let lbl='';
+    if(bilanFilter==='jour') lbl=dStr(key);
+    else if(bilanFilter==='semaine'){ const[yr,wn]=key.split('-W'); lbl='Semaine '+wn+' — '+yr; }
+    else if(bilanFilter==='mois'){ const[yr,mo]=key.split('-'); lbl=MN[parseInt(mo)-1]+' '+yr; }
+    else lbl='Année '+key;
+    const hasHS=hs>0;
+    html+=`<div style="border:1px solid ${hasHS?'rgba(240,64,128,.25)':'var(--brd)'};border-radius:8px;padding:11px;margin-bottom:7px;background:${hasHS?'rgba(240,64,128,.04)':'var(--sur2)'};">`;
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;">${lbl}</span><span style="font-size:11px;color:var(--tx2);">${hhmm(totH)}</span></div>`;
+    if(bilanFilter==='jour'&&gE.length===1){
+      const e=gE[0];
+      html+=`<div style="font-size:10px;color:var(--tx3);margin-top:3px;">${e.start} → ${e.end}${e.travelMin>0?' +'+hhmm(e.travelMin)+' trajet':''}${e.site?' · '+e.site:''}</div>`;
+    }
+    if(hasHS){
+      html+=`<div style="border-top:1px solid rgba(240,64,128,.2);margin-top:7px;padding-top:7px;">`;
+      if(s1>0) html+=`<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;"><span style="color:var(--acc);">+25% : ${hhmm(s1)} + ${hhmm(s1m)}</span><span style="color:var(--acc);font-weight:600;">= ${hhmm(s1+s1m)}</span></div>`;
+      if(s2>0) html+=`<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;"><span style="color:var(--red);">+50% : ${hhmm(s2)} + ${hhmm(s2m)}</span><span style="color:var(--red);font-weight:600;">= ${hhmm(s2+s2m)}</span></div>`;
+      html+=`<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;border-top:1px solid rgba(240,64,128,.2);margin-top:5px;padding-top:5px;"><span style="color:var(--red);">HS majorées</span><span style="color:var(--red);font-family:'Syne',sans-serif;font-size:14px;">${hhmm(hsM)}</span></div>`;
+      html+=`</div>`;
+    } else {
+      html+=`<div style="font-size:10px;color:var(--grn);margin-top:3px;">✓ Pas de HS</div>`;
+    }
+    html+=`</div>`;
+  });
+  const rcN=entries.filter(e=>e.type==='leave'&&e.leaveType==='repos').length;
+  const reposMin=rcN*DAY7, cagnotte=Math.max(0,cumHSMaj-reposMin);
+  html+=`<div style="background:rgba(240,64,128,.1);border:2px solid rgba(240,64,128,.4);border-radius:8px;padding:13px;margin-top:4px;">`;
+  html+=`<div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;">Total cumulé</div>`;
+  html+=`<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--tx2);">HS réelles</span><span>${hhmm(cumHSReel)}</span></div>`;
+  html+=`<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--tx2);">HS majorées brutes</span><span>${hhmm(cumHSMaj)}</span></div>`;
+  if(rcN>0) html+=`<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span style="color:var(--pur);">Repos posés</span><span style="color:var(--pur);">− ${hhmm(reposMin)}</span></div>`;
+  html+=`<div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid rgba(240,64,128,.3);margin-top:7px;padding-top:7px;"><span style="font-weight:700;font-size:12px;">🏦 CAGNOTTE</span><span style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--red);">${hhmm(cagnotte)}</span></div>`;
+  html+=`</div>`;
+  c.innerHTML=html;
+}
+
+function convertToRepos(){
+  const today=fmtD(new Date());
+  entries.push({id:nid++,type:'leave',date:today,leaveType:'repos',netMin:DAY7,note:'Repos compensateur (converti depuis HS)',start:'—',end:'—'});
+  save(); renderAll(); refreshLeave(); updateSummary();
+  toast('✓ 1 jour de repos compensateur posé — 7h déduites de la cagnotte');
+}
+
+function renderWeeksDetail(det){
+  const c=document.getElementById('wk-detail');
+  if(!det.length){ c.innerHTML='<p style="color:var(--tx3);font-size:11px;">Aucune donnée.</p>'; return; }
+  const mx=Math.max(...det.map(w=>w.tot),W35);
+  c.innerHTML=det.map(w=>{
+    const pct=Math.min(100,(w.tot/mx)*100);
+    const col=w.tot>W35?'var(--red)':'var(--grn)';
+    const hs=w.s1+w.s2;
+    const[yr,wn]=w.wk.split('-W');
+    return`<div class="wrow">
+      <div class="wlabel">S${wn}<br><span style="font-size:9px;color:var(--tx3);font-weight:400">${yr}</span></div>
+      <div class="wbar-w"><div class="wbar" style="width:${pct}%;background:${col}"></div></div>
+      <div>${hhmm(w.tot)}</div>
+      <div>${hs>0?'<span class="badge b-red">HS +'+hhmm(hs)+'</span>':'<span style="color:var(--tx3);font-size:10px">normal</span>'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+//  RAPPORT CHEF — helpers type/agence
+// ════════════════════════════════════════════
+function onRTypeChange(){
+  const t=document.getElementById('r-type').value;
+  const w=document.getElementById('r-agency-wrap');
+  w.style.display=(t==='cdi')?'none':'flex';
+  // Populate agencies
+  const sel=document.getElementById('r-agency');
+  const agencies=[...new Set(entries.filter(e=>e.type==='interim'&&e.agency&&e.agency!=='—').map(e=>e.agency))];
+  sel.innerHTML='<option value="all">Toutes les agences</option>';
+  agencies.forEach(a=>{ sel.innerHTML+=`<option value="${a}">${a}</option>`; });
+}
+
+// ════════════════════════════════════════════
+//  RAPPORT CHEF
+// ════════════════════════════════════════════
+function genReport(){
+  const name=document.getElementById('r-name').value||'Employé';
+  const perLbl=document.getElementById('r-period-lbl').value;
+  const filter=document.getElementById('r-filter').value;
+  const rtype=document.getElementById('r-type').value;
+  const agencyFilter=document.getElementById('r-agency').value;
+  const now=new Date();
+
+  // Filtre période
+  const inPeriod=e=>{
+    if(filter==='week'){
+      const mon=new Date(now); mon.setDate(now.getDate()-((now.getDay()||7)-1));
+      const sun=new Date(mon); sun.setDate(mon.getDate()+6);
+      return e.date>=fmtD(mon)&&e.date<=fmtD(sun);
+    }
+    if(filter==='month'){ const ym=fmtD(now).substring(0,7); return e.date.startsWith(ym); }
+    return true;
+  };
+
+  let wList=entries.filter(e=>e.type==='work'&&inPeriod(e)).sort((a,b)=>a.date.localeCompare(b.date));
+  let iList=entries.filter(e=>e.type==='interim'&&inPeriod(e)).sort((a,b)=>a.date.localeCompare(b.date));
+  let lList=entries.filter(e=>e.type==='leave'&&e.leaveType!=='repos'&&inPeriod(e)).sort((a,b)=>a.date.localeCompare(b.date));
+
+  // Filtre agence
+  if(agencyFilter!=='all') iList=iList.filter(e=>e.agency===agencyFilter);
+
+  // Selon le type de récap
+  if(rtype==='cdi') iList=[];
+  if(rtype==='interim') wList=[];
+
+  if(!wList.length&&!iList.length&&!lList.length){ toast('Aucune donnée pour cette période.','err'); return; }
+
+  const pLabel=filter==='week'?'Semaine en cours':filter==='month'?'Mois de '+MF[now.getMonth()]+' '+now.getFullYear():'Toutes les périodes';
+  const ts=now.toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const typeLabel=rtype==='cdi'?'CDI/CDD':rtype==='interim'?('Intérim'+(agencyFilter!=='all'?' — '+agencyFilter:'')):'CDI/CDD + Intérim';
+
+  const SEP='-'.repeat(62);
+  const DBL='='.repeat(62);
+  const L=[];
+
+  L.push(DBL);
+  L.push('      RÉCAPITULATIF DES HEURES DE TRAVAIL');
+  L.push(DBL);
+  L.push('  Salarié   : '+name);
+  L.push('  Période   : '+(perLbl||pLabel));
+  L.push('  Type      : '+typeLabel);
+  L.push('  Établi le : '+ts);
+  L.push(DBL);
+
+  // ── CDI/CDD ──
+  if(wList.length){
+    const wkMap={};
+    wList.forEach(e=>{ const w=isoWeek(e.date); if(!wkMap[w])wkMap[w]=[]; wkMap[w].push(e); });
+
+    L.push('');
+    L.push('  JOURNÉES CDI/CDD');
+    L.push(SEP);
+    Object.entries(wkMap).sort().forEach(([wk,wE])=>{
+      const[yr,wn]=wk.split('-W');
+      const tot=wE.reduce((a,e)=>a+e.netMin,0);
+      const s1=Math.max(0,Math.min(tot,W43)-W35);
+      const s2=Math.max(0,tot-W43);
+      const hs=s1+s2;
+      L.push('');
+      L.push('  Semaine '+wn+' ('+yr+')');
+      L.push('  '+'-'.repeat(58));
+      L.push('  Jour                       Arrivée   Départ    Total     Centre');
+      L.push('  '+'-'.repeat(58));
+      wE.sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+        const tw=e.travelMin||0;
+        const tj=tw>0?' [+'+hhmm(tw)+' trajet '+e.travelType+']':'';
+        L.push('  '+dStr(e.date).padEnd(28)+e.start.padEnd(10)+e.end.padEnd(10)+hhmm(e.netMin).padEnd(10)+(e.site||'—')+tj);
+      });
+      L.push('  '+'-'.repeat(58));
+      L.push('  Total semaine         : '+hhmm(tot));
+      if(hs>0){
+        const s1m=Math.round(s1*0.25), s2m=Math.round(s2*0.5);
+        L.push('');
+        L.push('  *** HS Semaine '+wn+' ***');
+        if(s1>0) L.push('    +25% : '+hhmm(s1)+' + '+hhmm(s1m)+' = '+hhmm(s1+s1m));
+        if(s2>0) L.push('    +50% : '+hhmm(s2)+' + '+hhmm(s2m)+' = '+hhmm(s2+s2m));
+        L.push('    TOTAL HS majorées : '+hhmm(hs+s1m+s2m));
+      } else {
+        L.push('  Heures supplémentaires: aucune');
+      }
+    });
+    // Bilan CDI cumulé
+    const wC2=calcOT(wList);
+    const s1mC=Math.round(wC2.s1*0.25), s2mC=Math.round(wC2.s2*0.5);
+    const hsBcdi=wC2.s1+wC2.s2;
+    L.push('');L.push(SEP);
+    L.push('  BILAN CDI/CDD');
+    L.push('  Total heures       : '+hhmm(wList.reduce((a,e)=>a+e.netMin,0)));
+    if(hsBcdi>0){
+      if(wC2.s1>0) L.push('  HS +25%            : '+hhmm(wC2.s1)+' => '+hhmm(wC2.s1+s1mC)+' majorées');
+      if(wC2.s2>0) L.push('  HS +50%            : '+hhmm(wC2.s2)+' => '+hhmm(wC2.s2+s2mC)+' majorées');
+      L.push('  HS MAJORÉES NETTES : '+hhmm(hsBcdi+s1mC+s2mC));
+    } else {
+      L.push('  Heures supplémentaires : aucune');
+    }
+  }
+
+  // ── INTÉRIM ──
+  if(iList.length){
+    L.push('');L.push('');
+    L.push('  JOURNÉES INTÉRIM'+(agencyFilter!=='all'?' — '+agencyFilter:''));
+    L.push(SEP);
+    L.push('  Jour                       Arrivée   Départ    Heures    Taux    Salaire   Frais km');
+    L.push('  '+'-'.repeat(72));
+    let totHi=0, totSal=0, totKm=0;
+    iList.forEach(e=>{
+      const sal=e.rate>0?(e.netMin/60)*e.rate:0;
+      const km=e.fraisKm||0;
+      totHi+=e.netMin; totSal+=sal; totKm+=km;
+      const rStr=(e.rate||0)>0?e.rate.toFixed(2)+'€':'—';
+      const sStr=sal>0?sal.toFixed(2)+'€':'—';
+      const kStr=km>0?km.toFixed(2)+'€':'—';
+      L.push('  '+dStr(e.date).padEnd(28)+e.start.padEnd(10)+e.end.padEnd(10)+hhmm(e.netMin).padEnd(10)+rStr.padEnd(8)+sStr.padEnd(10)+kStr);
+    });
+    L.push('  '+'-'.repeat(72));
+    L.push('  Total heures       : '+hhmm(totHi));
+    if(totSal>0) L.push('  Salaire brut total : '+totSal.toFixed(2)+' €');
+    if(totKm>0)  L.push('  Frais km cumulés   : '+totKm.toFixed(2)+' €');
+    if(totSal>0||totKm>0) L.push('  TOTAL BRUT         : '+(totSal+totKm).toFixed(2)+' €');
+    const iC2=calcOT(iList);
+    if(iC2.s1+iC2.s2>0){
+      const s1mi=Math.round(iC2.s1*0.25), s2mi=Math.round(iC2.s2*0.5);
+      L.push('  HS +25% intérim    : '+hhmm(iC2.s1)+' => '+hhmm(iC2.s1+s1mi)+' majorées');
+      if(iC2.s2>0) L.push('  HS +50% intérim    : '+hhmm(iC2.s2)+' => '+hhmm(iC2.s2+s2mi)+' majorées');
+    }
+  }
+
+  // ── CONGÉS ──
+  if(lList.length&&rtype!=='interim'){
+    L.push('');L.push('');
+    L.push('  CONGÉS & ABSENCES');
+    L.push(SEP);
+    lList.forEach(e=>L.push('  '+dStr(e.date).padEnd(28)+(LEAVE_LBL[e.leaveType]||e.leaveType)+(e.note?' — '+e.note:'')));
+    const cpN=lList.filter(e=>e.leaveType==='cp').length;
+    if(cpN>0) L.push('  Congés payés posés : '+cpN+' j');
+  }
+
+  L.push('');L.push('');
+  L.push(DBL);
+  L.push('');
+  L.push('  Signature employeur : ___________________________');
+  L.push('');
+  L.push('  Signature salarié   : ___________________________');
+  L.push('');
+  L.push(DBL);
+
+  const out=document.getElementById('report-out');
+  out.textContent=L.join('\n');
+  out.style.display='block';
+  ['r-sel','r-mail','r-dl','r-hint'].forEach(x=>document.getElementById(x).style.display='inline-flex');
+  document.getElementById('r-hint').style.display='block';
+  const rpdf=document.getElementById('r-pdf'); if(rpdf) rpdf.style.display='inline-flex';
+  if(wList.length){
+    const wkMap2={};
+    wList.forEach(e=>{ const w=isoWeek(e.date); if(!wkMap2[w])wkMap2[w]=[]; wkMap2[w].push(e); });
+    buildHSDetail(wkMap2);
+    document.getElementById('hs-accordion').style.display='block';
+    document.getElementById('hs-detail-panel').style.display='none';
+    document.getElementById('hs-arrow').textContent='▼';
+  } else {
+    document.getElementById('hs-accordion').style.display='none';
+  }
+  toast('✓ Récapitulatif généré');
+}
+
+function toggleHSDetail(){
+  const panel=document.getElementById('hs-detail-panel');
+  const arrow=document.getElementById('hs-arrow');
+  const open=panel.style.display==='block';
+  panel.style.display=open?'none':'block';
+  arrow.textContent=open?'▼':'▲';
+}
+
+function buildHSDetail(wkMap){
+  const c=document.getElementById('hs-detail-content');
+  const weeks=Object.entries(wkMap).sort();
+
+  if(!weeks.length){ c.innerHTML='<p style="color:var(--tx3);font-size:11px;">Aucune semaine.</p>'; return; }
+
+  // Y a-t-il des HS sur la période ?
+  const hasHS=weeks.some(([,wE])=>{
+    const tot=wE.reduce((a,e)=>a+e.netMin,0);
+    return tot>W35;
+  });
+
+  let html='';
+
+  if(!hasHS){
+    html='<p style="color:var(--grn);font-size:12px;padding:8px 0;">✓ Aucune heure supplémentaire sur cette période.</p>';
+  } else {
+    // Totaux cumulés
+    let cumS1=0, cumS2=0;
+
+    weeks.forEach(([wk,wE])=>{
+      const[yr,wn]=wk.split('-W');
+      const tot=wE.reduce((a,e)=>a+e.netMin,0);
+      const norm=Math.min(tot,W35);
+      const s1=Math.max(0,Math.min(tot,W43)-W35);
+      const s2=Math.max(0,tot-W43);
+      const hs=s1+s2;
+      cumS1+=s1; cumS2+=s2;
+
+      // Couleur de fond selon présence de HS
+      const bg=hs>0?'background:rgba(240,64,128,.06);border:1px solid rgba(240,64,128,.2);':'background:var(--sur2);border:1px solid var(--brd);';
+
+      html+=`<div style="${bg}border-radius:8px;padding:14px;margin-bottom:10px;">`;
+      html+=`<div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:10px;color:var(--tx);">Semaine ${wn} — ${yr}</div>`;
+
+      // Tableau des journées
+      html+=`<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;">`;
+      html+=`<thead><tr style="color:var(--tx3);font-size:9px;text-transform:uppercase;letter-spacing:1px;">
+        <th style="text-align:left;padding:4px 8px;">Jour</th>
+        <th style="text-align:left;padding:4px 8px;">Arrivée</th>
+        <th style="text-align:left;padding:4px 8px;">Départ</th>
+        <th style="text-align:right;padding:4px 8px;">Travail</th>
+        <th style="text-align:right;padding:4px 8px;">Trajet</th>
+        <th style="text-align:right;padding:4px 8px;color:var(--red);">Total</th>
+      </tr></thead><tbody>`;
+      wE.sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+        const tw=e.travelMin||0;
+        const nw=e.netWork||e.netMin;
+        html+=`<tr style="border-top:1px solid var(--brd);">
+          <td style="padding:5px 8px;">${dStr(e.date)}</td>
+          <td style="padding:5px 8px;color:var(--grn);">${e.start}</td>
+          <td style="padding:5px 8px;color:var(--red);">${e.end}</td>
+          <td style="padding:5px 8px;text-align:right;">${hhmm(nw)}</td>
+          <td style="padding:5px 8px;text-align:right;color:var(--acc);">${tw>0?'+'+hhmm(tw):'—'}</td>
+          <td style="padding:5px 8px;text-align:right;font-weight:600;">${hhmm(e.netMin)}</td>
+        </tr>`;
+      });
+      html+=`</tbody></table>`;
+
+      // Total semaine
+      html+=`<div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 8px;border-top:1px solid var(--brd);margin-bottom:8px;">
+        <span style="color:var(--tx2);">Total semaine</span>
+        <span style="font-weight:600;">${hhmm(tot)}</span>
+      </div>`;
+
+      if(hs===0){
+        html+=`<div style="font-size:11px;color:var(--grn);padding:4px 8px;">✓ Pas d'heures supplémentaires cette semaine</div>`;
+      } else {
+        html+=`<div style="background:rgba(240,64,128,.08);border-radius:6px;padding:10px 12px;font-size:11px;">`;
+        html+=`<div style="font-weight:700;color:var(--red);margin-bottom:8px;">⚡ Heures supplémentaires semaine ${wn}</div>`;
+        html+=`<div style="color:var(--tx2);margin-bottom:4px;">Heures normales (≤35h) : <strong style="color:var(--grn);">${hhmm(norm)}</strong></div>`;
+        if(s1>0){
+          const s1maj=Math.round(s1*0.25);
+          html+=`<div style="border-top:1px solid rgba(240,192,64,.2);padding-top:6px;margin-top:6px;">`;
+          html+=`<div style="color:var(--acc);font-weight:600;">Tranche +25% (36h → 43h)</div>`;
+          html+=`<div style="color:var(--tx2);padding-left:8px;margin-top:3px;">HS réalisées : <strong style="color:var(--acc);">${hhmm(s1)}</strong></div>`;
+          html+=`<div style="color:var(--tx2);padding-left:8px;">Majoration +25% : <strong style="color:var(--acc);">+ ${hhmm(s1maj)}</strong></div>`;
+          html+=`<div style="color:var(--acc);padding-left:8px;font-weight:700;">= Équivalent payé : ${hhmm(s1+s1maj)}</div>`;
+          html+=`</div>`;
+        }
+        if(s2>0){
+          const s2maj=Math.round(s2*0.5);
+          html+=`<div style="border-top:1px solid rgba(240,64,128,.2);padding-top:6px;margin-top:6px;">`;
+          html+=`<div style="color:var(--red);font-weight:600;">Tranche +50% (≥44h)</div>`;
+          html+=`<div style="color:var(--tx2);padding-left:8px;margin-top:3px;">HS réalisées : <strong style="color:var(--red);">${hhmm(s2)}</strong></div>`;
+          html+=`<div style="color:var(--tx2);padding-left:8px;">Majoration +50% : <strong style="color:var(--red);">+ ${hhmm(s2maj)}</strong></div>`;
+          html+=`<div style="color:var(--red);padding-left:8px;font-weight:700;">= Équivalent payé : ${hhmm(s2+s2maj)}</div>`;
+          html+=`</div>`;
+        }
+        html+=`<div style="border-top:1px solid rgba(240,64,128,.3);margin-top:8px;padding-top:8px;font-weight:700;color:var(--red);display:flex;justify-content:space-between;">
+          <span>TOTAL HS semaine ${wn}</span><span>${hhmm(hs)}</span>
+        </div>`;
+        html+=`</div>`;
+      }
+      html+=`</div>`;
+    });
+
+    // Récap cumulé toutes semaines
+    const cumHS=cumS1+cumS2;
+    if(cumHS>0){
+      const cumS1maj=Math.round(cumS1*0.25);
+      const cumS2maj=Math.round(cumS2*0.5);
+      html+=`<div style="background:rgba(240,64,128,.1);border:2px solid rgba(240,64,128,.4);border-radius:9px;padding:16px;margin-top:6px;">`;
+      html+=`<div style="font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:var(--red);margin-bottom:12px;">RÉCAPITULATIF CUMULÉ — TOUTES SEMAINES</div>`;
+      if(cumS1>0){
+        html+=`<div style="margin-bottom:8px;font-size:12px;">
+          <span style="color:var(--acc);font-weight:600;">+25% :</span>
+          <span style="color:var(--tx2);"> ${hhmm(cumS1)} + majoration ${hhmm(cumS1maj)} = </span>
+          <strong style="color:var(--acc);">${hhmm(cumS1+cumS1maj)}</strong>
+        </div>`;
+      }
+      if(cumS2>0){
+        html+=`<div style="margin-bottom:8px;font-size:12px;">
+          <span style="color:var(--red);font-weight:600;">+50% :</span>
+          <span style="color:var(--tx2);"> ${hhmm(cumS2)} + majoration ${hhmm(cumS2maj)} = </span>
+          <strong style="color:var(--red);">${hhmm(cumS2+cumS2maj)}</strong>
+        </div>`;
+      }
+      html+=`<div style="border-top:1px solid rgba(240,64,128,.4);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;">
+        <span style="color:var(--tx);">TOTAL HS MAJORÉES</span>
+        <span style="color:var(--red);">${hhmm(cumS1+cumS1maj+cumS2+cumS2maj)}</span>
+      </div>`;
+      html+=`</div>`;
+    }
+  }
+
+  c.innerHTML=html;
+}
+
+function selectAll(){
+  const out=document.getElementById('report-out');
+  if(!out||out.style.display==='none') return;
+  const r=document.createRange();
+  r.selectNodeContents(out);
+  const s=window.getSelection();
+  s.removeAllRanges();
+  s.addRange(r);
+  try{ document.execCommand('copy'); toast('✓ Texte sélectionné et copié'); }
+  catch(e){ toast('Texte sélectionné — Ctrl+C pour copier'); }
+}
+
+function mailReport(){
+  const name=document.getElementById('r-name').value||'';
+  const lbl=document.getElementById('r-period-lbl').value||'';
+  const txt=document.getElementById('report-out').textContent;
+  const sub=encodeURIComponent('Récapitulatif heures'+(name?' — '+name:'')+(lbl?' — '+lbl:''));
+  // Le corps du mail ne peut pas dépasser ~2000 car sur certains clients — on met un résumé court
+  const lines=txt.split('\n');
+  // On prend les 60 premières lignes max pour éviter la troncature
+  const body=encodeURIComponent(lines.slice(0,60).join('\n')+(lines.length>60?'\n\n[... voir fichier .txt joint pour le récap complet]':''));
+  const dest='resonance-imagerie@outlook.fr';
+  // mailto: avec location.href = seule méthode fiable sur mobile et desktop
+  window.location.href='mailto:'+encodeURIComponent(dest)+'?subject='+sub+'&body='+body;
+  toast('📧 Ouverture Outlook…');
+}
+
+function dlReport(){
+  const name=(document.getElementById('r-name').value||'export').replace(/\s+/g,'-');
+  const txt=document.getElementById('report-out').textContent;
+  const b=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download='recap-'+name+'.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u);
+  toast('✓ Fichier .txt téléchargé');
+}
+
+// ════════════════════════════════════════════
+//  SAUVEGARDE JSON
+// ════════════════════════════════════════════
+function exportJSON(){
+  const data={entries,nid,exportDate:new Date().toISOString(),app:'ChronoWork'};
+  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u; a.download='chronowork-sauvegarde-'+fmtD(new Date())+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u);
+  toast('✓ Sauvegarde téléchargée');
+}
+
+function importJSON(evt){
+  const file=evt.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.entries||!Array.isArray(data.entries)) throw new Error('Format invalide');
+      if(!confirm('Restaurer '+data.entries.length+' entrée(s) depuis le '+new Date(data.exportDate).toLocaleDateString('fr-FR')+'?\nCela remplacera les données actuelles.')) return;
+      entries=data.entries; nid=data.nid||entries.length+1;
+      save(); renderAll(); refreshLeave();
+      toast('✓ '+entries.length+' entrée(s) restaurée(s)');
+    }catch(err){ toast('Fichier invalide — vérifiez le .json','err'); }
+  };
+  reader.readAsText(file);
+  evt.target.value='';
+}
+
+// ════════════════════════════════════════════
+//  PWA — INSTALLATION MOBILE
+// ════════════════════════════════════════════
+let deferredPrompt=null;
+
+// Génération dynamique du manifest PWA
+function setupPWA(){
+  const manifest={
+    name:'ChronoWork — Suivi des Heures',
+    short_name:'ChronoWork',
+    description:'Suivi CDI, Intérim, Congés et Heures Supplémentaires',
+    start_url:'.',
+    display:'standalone',
+    background_color:'#0a0c10',
+    theme_color:'#0a0c10',
+    orientation:'portrait',
+    icons:[
+      {src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="80" fill="%230a0c10"/><text x="256" y="340" font-size="280" text-anchor="middle" fill="%23f0c040">⏱</text></svg>',sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}
+    ]
+  };
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  document.getElementById('pwa-manifest').href=url;
+
+  // Détection iOS
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+  const isInStandaloneMode=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+
+  if(isInStandaloneMode){
+    document.getElementById('pwa-card').style.display='none'; // déjà installé
+    return;
+  }
+  if(isIOS){
+    document.getElementById('pwa-ios').style.display='block';
+    return;
+  }
+
+  // Chrome/Android : attendre l'événement beforeinstallprompt
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault(); deferredPrompt=e;
+    document.getElementById('pwa-btn').style.display='inline-flex';
+  });
+}
+
+function installPWA(){
+  if(!deferredPrompt){ toast('Ouvrez cette page dans Chrome ou Edge pour installer.','warn'); return; }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r=>{
+    if(r.outcome==='accepted'){ toast('✓ ChronoWork installé sur votre écran d\'accueil !'); document.getElementById('pwa-card').style.display='none'; }
+    deferredPrompt=null;
+  });
+}
+
+// ════════════════════════════════════════════
+//  EXPORT ICS
+// ════════════════════════════════════════════
+function exportICS(filter){
+  let list=entries;
+  if(filter==='work')  list=entries.filter(e=>e.type==='work');
+  if(filter==='interim')list=entries.filter(e=>e.type==='interim');
+  if(filter==='leave') list=entries.filter(e=>e.type==='leave');
+  if(!list.length){ toast('Aucune entrée à exporter.','err'); return; }
+  let ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ChronoWork//FR','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  list.forEach(e=>{
+    const[y,m,d]=e.date.split('-');
+    if(e.type==='leave'){
+      const nx=addD(e.date,1).replace(/-/g,'');
+      ics=ics.concat(['BEGIN:VEVENT','UID:cw-'+e.id+'@cw','DTSTART;VALUE=DATE:'+y+m+d,'DTEND;VALUE=DATE:'+nx,'SUMMARY:🌴 '+(LEAVE_LBL[e.leaveType]||e.leaveType)+(e.note?' — '+e.note:''),'STATUS:CONFIRMED','END:VEVENT']);
+    } else {
+      const[sh,sm]=e.start.split(':'); let[eh,em]=e.end.split(':').map(Number);
+      if(eh*60+em<=tMin(e.start)) eh=(eh+24)%24;
+      const ds=y+m+d+'T'+sh+sm+'00';
+      const de=y+m+d+'T'+String(eh).padStart(2,'0')+String(em).padStart(2,'0')+'00';
+      const lbl=(e.type==='work'?'💼':'🔶')+' '+(e.site||e.type);
+      const desc='Arrivée: '+e.start+'\\nDépart: '+e.end+'\\nNet: '+hhmm(e.netMin)+(e.travelMin>0?'\\nTrajet '+e.travelType+': '+hhmm(e.travelMin):'')+(e.fraisKm>0?'\\nFrais km: '+e.fraisKm.toFixed(2)+' €':'');
+      ics=ics.concat(['BEGIN:VEVENT','UID:cw-'+e.id+'@cw','DTSTART:'+ds,'DTEND:'+de,'SUMMARY:'+lbl,'DESCRIPTION:'+desc,'STATUS:CONFIRMED','END:VEVENT']);
+    }
+  });
+  ics.push('END:VCALENDAR');
+  const b=new Blob([ics.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download='chronowork-'+filter+'-'+fmtD(new Date())+'.ics';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u);
+  toast('✓ Export .ics ('+list.length+' entrée(s))');
+}
+
+// ════════════════════════════════════════════
+//  RESET & TOAST
+// ════════════════════════════════════════════
+function resetAll(){
+  if(!confirm('Effacer TOUTES les données ? Irréversible.')) return;
+  entries=[]; nid=1; save(); renderAll(); refreshLeave(); updateSummary();
+  toast('Données effacées.');
+}
+
+// ════════════════════════════════════════════
+//  GRAPHIQUES
+// ════════════════════════════════════════════
+function renderDashboard(){
+  // Heures CDI par mois
+  const mWork={}, mHS={}, mKm={}, mLeave={};
+  entries.filter(e=>e.type==='work').forEach(e=>{
+    const k=e.date.substring(0,7);
+    mWork[k]=(mWork[k]||0)+e.netMin;
+  });
+  // HS par mois (calcul semaine par semaine)
+  const wksAll={};
+  entries.filter(e=>e.type==='work').forEach(e=>{
+    const wk=isoWeek(e.date);
+    if(!wksAll[wk])wksAll[wk]={entries:[],month:e.date.substring(0,7)};
+    wksAll[wk].entries.push(e);
+  });
+  Object.values(wksAll).forEach(w=>{
+    const tot=w.entries.reduce((a,e)=>a+e.netMin,0);
+    const hs=Math.max(0,tot-W35);
+    if(hs>0) mHS[w.month]=(mHS[w.month]||0)+hs;
+  });
+  entries.filter(e=>e.type==='interim'&&e.fraisKm>0).forEach(e=>{
+    const k=e.date.substring(0,7);
+    mKm[k]=(mKm[k]||0)+(e.fraisKm||0);
+  });
+  entries.filter(e=>e.type==='leave').forEach(e=>{
+    mLeave[e.leaveType]=(mLeave[e.leaveType]||0)+1;
+  });
+  drawBarH('ch-work',mWork,'var(--grn)');
+  drawBarH('ch-hs',mHS,'var(--red)');
+  drawBarE('ch-km',mKm,'var(--acc)');
+  const MN=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const LEAVE_COLORS={ferie:'var(--blu)',cp:'var(--pur)',repos:'var(--grn)',maladie:'var(--red)',autre:'var(--tx2)'};
+  const c=document.getElementById('ch-leave');
+  const lEntries=Object.entries(mLeave).filter(([,v])=>v>0);
+  const maxL=Math.max(...lEntries.map(([,v])=>v),1);
+  c.innerHTML=lEntries.map(([k,v])=>`<div class="bar-row">
+    <span class="bar-lbl">${LEAVE_LBL[k]||k}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/maxL*100)}%;background:${LEAVE_COLORS[k]||'var(--tx2)'}"></div></div>
+    <span style="font-size:11px;color:var(--tx2);text-align:right">${v} j</span>
+  </div>`).join('')||'<p style="color:var(--tx3);font-size:11px;">Aucune donnée.</p>';
+}
+
+function drawBarH(id,data,color){
+  const c=document.getElementById(id);
+  const MN=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const items=Object.entries(data).sort();
+  if(!items.length){c.innerHTML='<p style="color:var(--tx3);font-size:11px;">Aucune donnée.</p>';return;}
+  const mx=Math.max(...items.map(([,v])=>v),1);
+  c.innerHTML=items.map(([k,v])=>{
+    const [yr,mo]=k.split('-');
+    const lbl=MN[parseInt(mo)-1]+' '+yr.slice(2);
+    return`<div class="bar-row"><span class="bar-lbl">${lbl}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/mx*100)}%;background:${color}"></div></div>
+    <span style="font-size:11px;color:var(--tx2);text-align:right">${hhmm(v)}</span></div>`;
+  }).join('');
+}
+
+function drawBarE(id,data,color){
+  const c=document.getElementById(id);
+  const MN=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const items=Object.entries(data).sort();
+  if(!items.length){c.innerHTML='<p style="color:var(--tx3);font-size:11px;">Aucune donnée.</p>';return;}
+  const mx=Math.max(...items.map(([,v])=>v),1);
+  c.innerHTML=items.map(([k,v])=>{
+    const [yr,mo]=k.split('-');
+    const lbl=MN[parseInt(mo)-1]+' '+yr.slice(2);
+    return`<div class="bar-row"><span class="bar-lbl">${lbl}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/mx*100)}%;background:${color}"></div></div>
+    <span style="font-size:11px;color:var(--tx2);text-align:right">${v.toFixed(0)} €</span></div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+//  HISTORIQUE
+// ════════════════════════════════════════════
+function renderHistSearch(){
+  const q=(document.getElementById('hist-search').value||'').trim();
+  const res=document.getElementById('hist-search-results');
+  if(!q){ res.style.display='none'; return; }
+  // Chercher dans toutes les entrées CDI et intérim
+  const found=entries.filter(e=>(e.type==='work'||e.type==='interim')&&e.date.includes(q))
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  res.style.display='block';
+  if(!found.length){
+    res.innerHTML=`<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:16px;text-align:center;color:var(--tx3);font-size:12px;">Aucun résultat pour "${q}"</div>`;
+    return;
+  }
+  const MN2=['Janv','Févr','Mars','Avr','Mai','Juin','Juil','Août','Sept','Oct','Nov','Déc'];
+  res.innerHTML=`<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:14px;">
+    <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🔍 ${found.length} résultat(s) pour "${q}"</div>
+    ${found.map(e=>{
+      const isCDI=e.type==='work';
+      const sal=e.rate>0?(e.netMin/60)*e.rate:0;
+      return`<div style="border:1px solid ${isCDI?'rgba(74,240,176,.3)':'rgba(240,192,64,.3)'};border-radius:8px;padding:11px;margin-bottom:7px;background:${isCDI?'rgba(74,240,176,.04)':'rgba(240,192,64,.04)'};">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;">${dStr(e.date)}</span>
+          <span class="badge ${isCDI?'b-grn':'b-acc'}">${isCDI?'CDI':'Intérim'}</span>
+        </div>
+        <div style="font-size:11px;color:var(--tx2);">${e.start} → ${e.end} · <strong>${hhmm(e.netMin)}</strong>${e.site?' · '+e.site:''}</div>
+        ${e.travelMin>0?`<div style="font-size:10px;color:var(--acc);">+ ${hhmm(e.travelMin)} trajet ${e.travelType||''}</div>`:''}
+        ${sal>0?`<div style="font-size:10px;color:var(--grn);">💰 ${hhmm(e.netMin)} × ${e.rate}€/h = ${sal.toFixed(2)}€</div>`:''}
+        ${e.fraisKm>0?`<div style="font-size:10px;color:var(--acc);">🚗 ${e.fraisKm.toFixed(2)}€ frais km</div>`:''}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderHistory(){
+  const yr=document.getElementById('hist-year').value;
+  const type=document.getElementById('hist-type').value;
+  const MN=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const SH=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+  const months=Array.from({length:12},(_,i)=>{
+    const mo=String(i+1).padStart(2,'0');
+    const key=`${yr}-${mo}`;
+    let wMin=0, iMin=0, hsMin=0;
+    const wks={};
+    entries.filter(e=>e.date.startsWith(key)).forEach(e=>{
+      if(e.type==='work'){ wMin+=e.netMin; const w=isoWeek(e.date); if(!wks[w])wks[w]=0; wks[w]+=e.netMin; }
+      if(e.type==='interim') iMin+=e.netMin;
+    });
+    Object.values(wks).forEach(t=>{ hsMin+=Math.max(0,t-W35); });
+    const iSal=entries.filter(e=>e.type==='interim'&&e.date.startsWith(key)).reduce((a,e)=>a+(e.rate>0?(e.netMin/60)*e.rate:0),0);
+    const iKm=entries.filter(e=>e.type==='interim'&&e.date.startsWith(key)).reduce((a,e)=>a+(e.fraisKm||0),0);
+    return{i,key,wMin,iMin,hsMin,iSal,iKm,totMin:wMin+iMin};
+  });
+
+  const grid=document.getElementById('hist-months');
+
+  if(type==='both-split'){
+    grid.innerHTML=`
+      <div style="font-size:10px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">💼 CDI/CDD</div>
+      <div class="month-grid" style="margin-bottom:16px;">${months.map(m=>{
+        const col=m.hsMin>0?'var(--red)':m.wMin>0?'var(--grn)':'var(--tx3)';
+        const active=m.wMin>0;
+        return`<div class="month-card" onclick="${active?'showMonthDetail(\''+m.key+'\',\'work\')':''}" style="opacity:${active?1:.35};${active?'border-color:'+col+';cursor:pointer':''}">
+          <div class="mn">${MN[m.i]}</div>
+          <div class="mv" style="color:${col}">${active?hhmm(m.wMin):'—'}</div>
+          <div class="ms">${m.hsMin>0?'HS: '+hhmm(m.hsMin):''}</div>
+          ${active?'<div style="font-size:9px;color:var(--tx3);margin-top:4px;">Cliquer pour détail</div>':''}
+        </div>`;
+      }).join('')}</div>
+      <div style="font-size:10px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🔶 Intérim</div>
+      <div class="month-grid">${months.map(m=>{
+        const active=m.iMin>0;
+        return`<div class="month-card" onclick="${active?'showMonthDetail(\''+m.key+'\',\'interim\')':''}" style="opacity:${active?1:.35};${active?'border-color:var(--acc);cursor:pointer':''}">
+          <div class="mn">${MN[m.i]}</div>
+          <div class="mv" style="color:${active?'var(--acc)':'var(--tx3)'}">${active?hhmm(m.iMin):'—'}</div>
+          <div class="ms">${m.iSal>0?m.iSal.toFixed(0)+'€':''} ${m.iKm>0?'· '+m.iKm.toFixed(0)+'€ km':''}</div>
+          ${active?'<div style="font-size:9px;color:var(--tx3);margin-top:4px;">Cliquer pour détail</div>':''}
+        </div>`;
+      }).join('')}</div>`;
+  } else {
+    const typeWork=type==='work'||type==='both';
+    const typeInterim=type==='interim'||type==='both';
+    grid.innerHTML=`<div class="month-grid">${months.map(m=>{
+      const tot=(typeWork?m.wMin:0)+(typeInterim?m.iMin:0);
+      const col=m.hsMin>0?'var(--red)':tot>0?'var(--grn)':'var(--tx3)';
+      const active=tot>0;
+      return`<div class="month-card" onclick="${active?'showMonthDetail(\''+m.key+'\',\''+type+'\')':''}" style="opacity:${active?1:.35};${active?'border-color:'+col+';cursor:pointer':''}">
+        <div class="mn">${MN[m.i]}</div>
+        <div class="mv" style="color:${col}">${active?hhmm(tot):'—'}</div>
+        <div class="ms">${m.hsMin>0?'HS: '+hhmm(m.hsMin):''}${m.iSal>0?' · '+m.iSal.toFixed(0)+'€':''}</div>
+        ${active?'<div style="font-size:9px;color:var(--tx3);margin-top:4px;">Cliquer pour détail</div>':''}
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  // Graphique comparatif
+  const cmp=document.getElementById('ch-compare');
+  const useW=type==='work'||type==='both'||type==='both-split';
+  const useI=type==='interim'||type==='both'||type==='both-split';
+  const mx=Math.max(...months.map(m=>(useW?m.wMin:0)+(useI?m.iMin:0)),1);
+  cmp.innerHTML=months.map(m=>{
+    const tot=(useW?m.wMin:0)+(useI?m.iMin:0);
+    const pct=Math.round(tot/mx*100);
+    const col=m.hsMin>0?'var(--red)':tot>0?'var(--grn)':'var(--brd)';
+    return`<div class="bar-row">
+      <span class="bar-lbl">${SH[m.i]}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      <span style="font-size:10px;color:var(--tx2);text-align:right">${tot>0?hhmm(tot):'—'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+//  NOTIFICATIONS / RAPPELS
+// ════════════════════════════════════════════
+let notifs=JSON.parse(localStorage.getItem('cw4_notifs')||'[]');
+function saveNotifs(){ localStorage.setItem('cw4_notifs',JSON.stringify(notifs)); }
+const DN=['','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+
+function askNotifPerm(){
+  if(!('Notification' in window)){ toast('Non supporté sur ce navigateur.','warn'); return; }
+  Notification.requestPermission().then(p=>{
+    const s=document.getElementById('notif-status');
+    if(p==='granted'){ s.textContent='✓ Activées'; s.style.color='var(--grn)'; toast('✓ Notifications activées !'); }
+    else { s.textContent='✗ Refusées'; s.style.color='var(--red)'; }
+  });
+}
+
+function addNotif(){
+  const day=parseInt(document.getElementById('notif-day').value);
+  const time=document.getElementById('notif-time').value;
+  const msg=document.getElementById('notif-msg').value||'Saisir vos heures !';
+  notifs.push({id:Date.now(),day,time,msg,active:true});
+  saveNotifs(); renderNotifList(); scheduleNotifs();
+  toast('✓ Rappel ajouté — '+DN[day]+' à '+time);
+}
+
+function delNotif(id){ notifs=notifs.filter(n=>n.id!==id); saveNotifs(); renderNotifList(); }
+
+function toggleNotif(id){
+  const n=notifs.find(n=>n.id===id);
+  if(n){ n.active=!n.active; saveNotifs(); renderNotifList(); scheduleNotifs(); }
+}
+
+function renderNotifList(){
+  const c=document.getElementById('notif-list');
+  const em=document.getElementById('notif-empty');
+  if(!notifs.length){ c.innerHTML=''; em.style.display='block'; return; }
+  em.style.display='none';
+  c.innerHTML=notifs.map(n=>`<div class="notif-item">
+    <div>
+      <div style="color:var(--tx2)">${DN[n.day]} à ${n.time}</div>
+      <div style="color:var(--tx3);font-size:10px;margin-top:2px">${n.msg}</div>
+    </div>
+    <div class="brow">
+      <button class="btn ${n.active?'bw':'bg'}" onclick="toggleNotif(${n.id})" style="font-size:10px;padding:4px 10px">${n.active?'✓ Actif':'Inactif'}</button>
+      <button class="btn bd" onclick="delNotif(${n.id})">✕</button>
+    </div>
+  </div>`).join('');
+  const s=document.getElementById('notif-status');
+  if(s&&'Notification' in window){
+    if(Notification.permission==='granted'){s.textContent='✓ Activées';s.style.color='var(--grn)';}
+    else if(Notification.permission==='denied'){s.textContent='✗ Bloquées';s.style.color='var(--red)';}
+  }
+}
+
+function scheduleNotifs(){
+  if(!('Notification' in window)) return;
+  clearInterval(window._notifInt);
+  window._notifInt=setInterval(()=>{
+    if(Notification.permission!=='granted') return;
+    const now=new Date();
+    const dow=now.getDay()||7;
+    const ts=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    notifs.filter(n=>n.active&&n.day===dow&&n.time===ts).forEach(n=>{
+      try{ new Notification('⏱ ChronoWork',{body:n.msg}); }catch(e){}
+    });
+  },60000);
+}
+
+function exportPDF(){
+  const txt=document.getElementById('report-out').textContent;
+  if(!txt){ toast('Générez d\'abord le récapitulatif.','err'); return; }
+
+  const date=new Date().toLocaleDateString('fr-FR');
+  const name=(document.getElementById('r-name').value||'recap').replace(/\s+/g,'-');
+
+  // Génère un HTML complet prêt à imprimer en PDF
+  const htmlContent=`<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8">
+<title>ChronoWork — Récapitulatif</title>
+<style>
+  body{font-family:'Courier New',monospace;font-size:11px;line-height:1.9;color:#111;background:#fff;padding:20mm;margin:0;}
+  h1{font-family:Arial,sans-serif;font-size:15px;font-weight:700;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:16px;}
+  pre{white-space:pre-wrap;word-break:break-word;margin:0;}
+  .footer{margin-top:24px;font-size:9px;color:#888;border-top:1px solid #ddd;padding-top:8px;}
+  @media print{body{padding:10mm;}@page{size:A4;margin:15mm;}}
+</style>
+</head><body>
+<h1>ChronoWork — Récapitulatif des Heures</h1>
+<pre>${txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+<div class="footer">Généré par ChronoWork le ${date}</div>
+</body></html>`;
+
+  // Téléchargement direct sans popup
+  const blob=new Blob([htmlContent],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='ChronoWork-'+name+'-'+new Date().toISOString().slice(0,10)+'.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  toast('✓ Fichier téléchargé — ouvrez-le et imprimez en PDF');
+}
+
+function showMonthDetail(key, type){
+  const MNF=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const [yr,mo]=key.split('-');
+  const moisNom=MNF[parseInt(mo)-1]+' '+yr;
+  const showWork=type==='work'||type==='both';
+  const showInterim=type==='interim'||type==='both';
+
+  // Récupérer les entrées du mois
+  const wList=entries.filter(e=>e.type==='work'&&e.date.startsWith(key)).sort((a,b)=>a.date.localeCompare(b.date));
+  const iList=entries.filter(e=>e.type==='interim'&&e.date.startsWith(key)).sort((a,b)=>a.date.localeCompare(b.date));
+
+  // Totaux CDI
+  const totTravW=wList.reduce((a,e)=>a+e.netMin,0);
+  const totTrajW=wList.reduce((a,e)=>a+(e.travelMin||0),0);
+  const wks={};
+  wList.forEach(e=>{ const w=isoWeek(e.date); if(!wks[w])wks[w]=0; wks[w]+=e.netMin; });
+  let hsW=0,s1W=0,s2W=0;
+  Object.values(wks).forEach(t=>{ s1W+=Math.max(0,Math.min(t,W43)-W35); s2W+=Math.max(0,t-W43); });
+  hsW=s1W+s2W;
+  const s1Wm=Math.round(s1W*0.25), s2Wm=Math.round(s2W*0.5);
+
+  // Totaux intérim
+  const totTravI=iList.reduce((a,e)=>a+e.netMin,0);
+  const totKmI=iList.reduce((a,e)=>a+(e.fraisKm||0),0);
+  const totSalI=iList.reduce((a,e)=>a+(e.rate>0?(e.netMin/60)*e.rate:0),0);
+
+  let html='';
+
+  // ── CDI ──
+  if(showWork&&wList.length){
+    html+=`<div style="font-size:10px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">💼 CDI/CDD</div>`;
+    html+=`<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px;">`;
+    html+=`<thead><tr style="color:var(--tx3);font-size:9px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--brd);">
+      <th style="text-align:left;padding:5px 8px;">Jour</th>
+      <th style="text-align:center;padding:5px 8px;">Arrivée</th>
+      <th style="text-align:center;padding:5px 8px;">Départ</th>
+      <th style="text-align:right;padding:5px 8px;">Travail</th>
+      <th style="text-align:right;padding:5px 8px;">Trajet</th>
+      <th style="text-align:right;padding:5px 8px;">Total</th>
+      <th style="text-align:left;padding:5px 8px;">Centre</th>
+    </tr></thead><tbody>`;
+    wList.forEach(e=>{
+      const tw=e.travelMin||0;
+      const nw=e.netWork||e.netMin;
+      html+=`<tr style="border-bottom:1px solid var(--brd);">
+        <td style="padding:6px 8px;">${dStr(e.date)}</td>
+        <td style="padding:6px 8px;text-align:center;color:var(--grn);">${e.start}</td>
+        <td style="padding:6px 8px;text-align:center;color:var(--red);">${e.end}</td>
+        <td style="padding:6px 8px;text-align:right;">${hhmm(nw)}</td>
+        <td style="padding:6px 8px;text-align:right;color:var(--acc);">${tw>0?'+'+hhmm(tw):'—'}</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;">${hhmm(e.netMin)}</td>
+        <td style="padding:6px 8px;color:var(--tx3);font-size:10px;">${e.site||'—'}</td>
+      </tr>`;
+    });
+    html+=`</tbody></table>`;
+    // Totaux CDI
+    html+=`<div style="background:var(--sur2);border-radius:8px;padding:12px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">`;
+    html+=`<div style="font-size:11px;"><span style="color:var(--tx3);">Total travail</span><br><strong style="color:var(--grn);font-size:14px;">${hhmm(totTravW)}</strong></div>`;
+    html+=`<div style="font-size:11px;"><span style="color:var(--tx3);">Total trajet</span><br><strong style="color:var(--acc);font-size:14px;">${totTrajW>0?'+'+hhmm(totTrajW):'—'}</strong></div>`;
+    if(hsW>0){
+      html+=`<div style="font-size:11px;"><span style="color:var(--tx3);">HS réalisées</span><br><strong style="color:var(--red);font-size:14px;">${hhmm(hsW)}</strong></div>`;
+      html+=`<div style="font-size:11px;"><span style="color:var(--tx3);">HS majorées</span><br>`;
+      if(s1W>0) html+=`<span style="color:var(--acc);font-size:11px;">+25%: ${hhmm(s1W+s1Wm)}</span><br>`;
+      if(s2W>0) html+=`<span style="color:var(--red);font-size:11px;">+50%: ${hhmm(s2W+s2Wm)}</span>`;
+      html+=`</div>`;
+      html+=`<div style="grid-column:1/-1;background:rgba(240,64,128,.08);border-radius:6px;padding:8px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:700;font-size:12px;">Total HS majorées</span>
+        <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--red);">${hhmm(hsW+s1Wm+s2Wm)}</span>
+      </div>`;
+    } else {
+      html+=`<div style="grid-column:1/-1;font-size:11px;color:var(--grn);">✓ Aucune heure supplémentaire</div>`;
+    }
+    html+=`</div>`;
+  }
+
+  // ── INTÉRIM ──
+  if(showInterim&&iList.length){
+    html+=`<div style="font-size:10px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🔶 Intérim</div>`;
+    html+=`<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px;">`;
+    html+=`<thead><tr style="color:var(--tx3);font-size:9px;text-transform:uppercase;border-bottom:1px solid var(--brd);">
+      <th style="text-align:left;padding:5px 8px;">Jour</th>
+      <th style="text-align:center;padding:5px 8px;">Arrivée</th>
+      <th style="text-align:center;padding:5px 8px;">Départ</th>
+      <th style="text-align:right;padding:5px 8px;">Heures</th>
+      <th style="text-align:right;padding:5px 8px;">Taux</th>
+      <th style="text-align:right;padding:5px 8px;">Salaire</th>
+      <th style="text-align:right;padding:5px 8px;">Frais km</th>
+    </tr></thead><tbody>`;
+    iList.forEach(e=>{
+      const sal=e.rate>0?(e.netMin/60)*e.rate:0;
+      html+=`<tr style="border-bottom:1px solid var(--brd);">
+        <td style="padding:6px 8px;">${dStr(e.date)}</td>
+        <td style="padding:6px 8px;text-align:center;color:var(--grn);">${e.start}</td>
+        <td style="padding:6px 8px;text-align:center;color:var(--red);">${e.end}</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600;">${hhmm(e.netMin)}</td>
+        <td style="padding:6px 8px;text-align:right;color:var(--acc);">${e.rate>0?e.rate.toFixed(2)+'€':'—'}</td>
+        <td style="padding:6px 8px;text-align:right;color:var(--grn);">${sal>0?sal.toFixed(2)+'€':'—'}</td>
+        <td style="padding:6px 8px;text-align:right;color:var(--acc);">${e.fraisKm>0?e.fraisKm.toFixed(2)+'€':'—'}</td>
+      </tr>`;
+    });
+    html+=`</tbody></table>`;
+    html+=`<div style="background:var(--sur2);border-radius:8px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">`;
+    html+=`<div style="font-size:11px;"><span style="color:var(--tx3);">Total heures</span><br><strong style="color:var(--acc);font-size:14px;">${hhmm(totTravI)}</strong></div>`;
+    if(totSalI>0) html+=`<div style="font-size:11px;"><span style="color:var(--tx3);">Salaire net</span><br><strong style="color:var(--grn);font-size:14px;">${totSalI.toFixed(2)} €</strong></div>`;
+    if(totKmI>0)  html+=`<div style="font-size:11px;"><span style="color:var(--tx3);">Frais km</span><br><strong style="color:var(--acc);font-size:14px;">${totKmI.toFixed(2)} €</strong></div>`;
+    if(totSalI>0||totKmI>0) html+=`<div style="grid-column:1/-1;background:rgba(74,240,176,.08);border-radius:6px;padding:8px;display:flex;justify-content:space-between;"><span style="font-weight:700;">Total brut</span><span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--grn);">${(totSalI+totKmI).toFixed(2)} €</span></div>`;
+    html+=`</div>`;
+  }
+
+  if(!html) html='<p style="color:var(--tx3);font-size:12px;text-align:center;padding:20px;">Aucune donnée pour ce mois.</p>';
+
+  // Afficher
+  document.getElementById('hist-detail-title').textContent=moisNom;
+  document.getElementById('hist-detail-body').innerHTML=html;
+  const panel=document.getElementById('hist-month-detail');
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toast(msg, type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+type;
+  clearTimeout(t._t); t._t=setTimeout(()=>{ t.className='toast'; },4000);
+}
+</script>
+</body>
+</html>
